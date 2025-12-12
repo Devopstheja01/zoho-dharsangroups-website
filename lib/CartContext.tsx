@@ -39,23 +39,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     // Load cart and user from localStorage on mount
     useEffect(() => {
-        const savedCart = localStorage.getItem('cart')
-        const savedUser = localStorage.getItem('user')
-        if (savedCart) setCart(JSON.parse(savedCart))
-        if (savedUser) setUser(JSON.parse(savedUser))
+        if (typeof window !== 'undefined') {
+            const savedCart = localStorage.getItem('cart')
+            const savedUser = localStorage.getItem('user')
+            if (savedCart) setCart(JSON.parse(savedCart))
+            if (savedUser) setUser(JSON.parse(savedUser))
+        }
     }, [])
 
     // Save cart to localStorage whenever it changes
     useEffect(() => {
-        localStorage.setItem('cart', JSON.stringify(cart))
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('cart', JSON.stringify(cart))
+        }
     }, [cart])
 
     // Save user to localStorage whenever it changes
     useEffect(() => {
-        if (user) {
-            localStorage.setItem('user', JSON.stringify(user))
-        } else {
-            localStorage.removeItem('user')
+        if (typeof window !== 'undefined') {
+            if (user) {
+                localStorage.setItem('user', JSON.stringify(user))
+            } else {
+                localStorage.removeItem('user')
+            }
         }
     }, [user])
 

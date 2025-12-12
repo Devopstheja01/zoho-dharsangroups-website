@@ -13,8 +13,10 @@ export default function AdminLoginPage() {
         e.preventDefault()
         // Mock admin login - in production, verify credentials
         if (credentials.username && credentials.password) {
-            localStorage.setItem('admin', JSON.stringify({ id: '1', username: credentials.username }))
-            window.location.href = '/admin/dashboard'
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('admin', JSON.stringify({ id: '1', username: credentials.username }))
+                window.location.href = '/admin/dashboard'
+            }
         }
     }
 

@@ -17,16 +17,20 @@ export default function AdminDashboardPage() {
     const [admin, setAdmin] = useState<any>(null)
 
     useEffect(() => {
-        const adminData = localStorage.getItem('admin')
-        if (!adminData) {
-            router.push('/admin/login')
-        } else {
-            setAdmin(JSON.parse(adminData))
+        if (typeof window !== 'undefined') {
+            const adminData = localStorage.getItem('admin')
+            if (!adminData) {
+                router.push('/admin/login')
+            } else {
+                setAdmin(JSON.parse(adminData))
+            }
         }
     }, [router])
 
     const handleLogout = () => {
-        localStorage.removeItem('admin')
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('admin')
+        }
         router.push('/admin/login')
     }
 
