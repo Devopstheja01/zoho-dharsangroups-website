@@ -71,7 +71,12 @@ export default function ShopCategory({ params }: { params: { category: string } 
     };
 
     const handleLogin = (mobile: string) => {
-        login(mobile);
+        login({
+            id: Date.now().toString(),
+            email: `${mobile}@customer.com`,
+            name: 'Customer',
+            mobile: mobile
+        });
         if (pendingProduct) {
             addToCart(pendingProduct);
             setPendingProduct(null);
