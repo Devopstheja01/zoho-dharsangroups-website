@@ -1,0 +1,169 @@
+.navbar {
+    background-color: var(--color-primary);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-md);
+    padding: 0.5rem 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: white;
+}
+
+.logoImage {
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+}
+
+.logoText {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--color-accent);
+}
+
+.links {
+    display: flex;
+    gap: 2.5rem;
+    align-items: center;
+}
+
+.link {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: color var(--transition-base);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    position: relative;
+}
+
+.link::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--color-accent);
+    transition: width var(--transition-base);
+}
+
+.link:hover {
+    color: var(--color-accent);
+}
+
+.link:hover::after {
+    width: 100%;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.cartBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-base);
+    padding: 0.5rem;
+}
+
+.cartBtn svg {
+    transition: transform var(--transition-base);
+}
+
+.cartBtn:hover {
+    color: var(--color-accent);
+}
+
+.cartBtn:hover svg {
+    transform: scale(1.1);
+}
+
+.loginBtn {
+    background-color: var(--color-accent);
+    color: var(--color-primary);
+    border: none;
+    padding: 0.6rem 1.8rem;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+}
+
+.loginBtn:hover {
+    background-color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.userMenu {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.userPhone {
+    font-size: 0.9rem;
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.logoutBtn {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all var(--transition-base);
+    font-weight: 600;
+}
+
+.logoutBtn:hover {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-primary);
+}
+
+@media (max-width: 768px) {
+    .links {
+        display: none;
+    }
+
+    .logoText {
+        font-size: 1.2rem;
+    }
+
+    .container {
+        padding: 0 1rem;
+    }
+}

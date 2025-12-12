@@ -1,0 +1,82 @@
+.main {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    background-color: var(--color-primary);
+    color: white;
+    padding: var(--spacing-2xl) 0;
+    text-align: center;
+}
+
+.title {
+    color: white;
+    font-size: 2.5rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.subtitle {
+    color: #94a3b8;
+}
+
+.content {
+    padding: var(--spacing-2xl) var(--spacing-md);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-2xl);
+}
+
+.benefit {
+    margin-bottom: var(--spacing-lg);
+}
+
+.benefit h3 {
+    color: var(--color-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.card {
+    background: white;
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.formGroup label {
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.input,
+.textarea {
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
