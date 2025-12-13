@@ -44,8 +44,8 @@ export default function WomenShopPage() {
             {/* Header */}
             <div className="bg-gradient-to-r from-primary to-primary-light text-white py-12">
                 <div className="container-custom">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4 font-serif">Women's Collection</h1>
-                    <p className="text-gray-300 text-lg">
+                    <h1 className="text-4xl md:text-5xl font-bold mb-4 font-serif text-white">Women's Collection</h1>
+                    <p className="text-gray-300 text-lg text-white/90">
                         Elegant sarees, dresses & ethnic wear with custom stitching options
                     </p>
                 </div>

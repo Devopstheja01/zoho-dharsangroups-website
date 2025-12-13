@@ -88,7 +88,7 @@ export default function HomePage() {
             {/* CTA Section */}
             <section className="bg-primary text-white py-16">
                 <div className="container-custom text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
                         Need Custom Tailoring?
                     </h2>
                     <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">

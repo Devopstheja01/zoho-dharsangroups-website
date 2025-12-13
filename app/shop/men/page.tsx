@@ -44,8 +44,8 @@ export default function MenShopPage() {
             {/* Header */}
             <div className="bg-primary text-white py-12">
                 <div className="container-custom">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4 font-serif">Men's Collection</h1>
-                    <p className="text-gray-300 text-lg">
+                    <h1 className="text-4xl md:text-5xl font-bold mb-4 font-serif text-white">Men's Collection</h1>
+                    <p className="text-gray-300 text-lg text-white/90">
                         Premium shirts, pants, formals & wedding suits with custom stitching
                     </p>
                 </div>

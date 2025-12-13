@@ -42,8 +42,8 @@ export default function AdminDashboardPage() {
             <div className="bg-primary text-white py-6">
                 <div className="container-custom flex justify-between items-center">
                     <div>
-                        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-                        <p className="text-gray-300">Welcome back, {admin.username}</p>
+                        <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
+                        <p className="text-gray-300 text-white/90">Welcome back, {admin.username}</p>
                     </div>
                     <div className="flex gap-4">
                         <Link href="/" className="btn bg-white text-primary hover:bg-gray-100">

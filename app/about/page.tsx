@@ -4,8 +4,8 @@ export default function AboutPage() {
             {/* Hero */}
             <div className="bg-primary text-white py-20">
                 <div className="container-custom text-center">
-                    <h1 className="text-5xl font-bold mb-6 font-serif">About Dharsan Groups</h1>
-                    <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                    <h1 className="text-5xl font-bold mb-6 font-serif text-white">About Dharsan Groups</h1>
+                    <p className="text-xl text-gray-300 max-w-3xl mx-auto text-white/90">
                         Premium tailoring and fashion excellence serving Tirupati and Telugu states since decades
                     </p>
                 </div>
