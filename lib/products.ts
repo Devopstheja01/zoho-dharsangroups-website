@@ -30,7 +30,7 @@ export interface Product {
     tags: string[]
 }
 
-// Mock product data
+// Mock product data with actual images
 export const products: Product[] = [
     // Men's Products
     {
@@ -41,7 +41,7 @@ export const products: Product[] = [
         originalPrice: 1500,
         category: 'men',
         subcategory: 'Shirts',
-        images: ['/products/men-shirt-1.jpg', '/products/men-shirt-1-alt.jpg'],
+        images: ['/images/mens-shirt.png'],
         sizes: ['S', 'M', 'L', 'XL', 'XXL', 'Custom'],
         colors: ['White', 'Blue', 'Black'],
         inStock: true,
@@ -58,7 +58,7 @@ export const products: Product[] = [
         price: 1400,
         category: 'men',
         subcategory: 'Pants',
-        images: ['/products/men-pants-1.jpg'],
+        images: ['/images/mens-pants.png'],
         sizes: ['28', '30', '32', '34', '36', '38', 'Custom'],
         colors: ['Black', 'Navy', 'Grey'],
         inStock: true,
@@ -76,7 +76,7 @@ export const products: Product[] = [
         originalPrice: 10000,
         category: 'men',
         subcategory: 'Wedding Suits',
-        images: ['/products/wedding-suit-1.jpg', '/products/wedding-suit-1-alt.jpg'],
+        images: ['/images/mens-wedding.png'],
         sizes: ['S', 'M', 'L', 'XL', 'Custom'],
         colors: ['Cream', 'Gold', 'Maroon'],
         inStock: true,
@@ -93,7 +93,7 @@ export const products: Product[] = [
         price: 1800,
         category: 'men',
         subcategory: 'Jeans',
-        images: ['/products/jeans-1.jpg'],
+        images: ['/images/mens-pants.png'],
         sizes: ['28', '30', '32', '34', '36'],
         colors: ['Blue', 'Black'],
         inStock: true,
@@ -113,7 +113,7 @@ export const products: Product[] = [
         originalPrice: 5500,
         category: 'women',
         subcategory: 'Silk Sarees',
-        images: ['/products/silk-saree-1.jpg', '/products/silk-saree-1-alt.jpg'],
+        images: ['/images/womens-saree.png'],
         sizes: ['Standard'],
         colors: ['Red', 'Green', 'Blue', 'Gold'],
         inStock: true,
@@ -130,7 +130,7 @@ export const products: Product[] = [
         price: 850,
         category: 'women',
         subcategory: 'Cotton Sarees',
-        images: ['/products/cotton-saree-1.jpg'],
+        images: ['/images/womens-cotton.png'],
         sizes: ['Standard'],
         colors: ['Pink', 'Yellow', 'Green', 'Blue'],
         inStock: true,
@@ -147,7 +147,7 @@ export const products: Product[] = [
         price: 12000,
         category: 'women',
         subcategory: 'Premium Sarees',
-        images: ['/products/premium-saree-1.jpg', '/products/premium-saree-1-alt.jpg'],
+        images: ['/images/womens-saree.png'],
         sizes: ['Standard'],
         colors: ['Maroon', 'Gold'],
         inStock: true,
@@ -164,7 +164,7 @@ export const products: Product[] = [
         price: 2200,
         category: 'women',
         subcategory: 'Dresses',
-        images: ['/products/dress-1.jpg'],
+        images: ['/images/womens-dress.png'],
         sizes: ['XS', 'S', 'M', 'L', 'XL', 'Custom'],
         colors: ['Black', 'Navy', 'Maroon'],
         inStock: true,
@@ -181,7 +181,7 @@ export const products: Product[] = [
         price: 650,
         category: 'women',
         subcategory: 'Chunnis',
-        images: ['/products/chunni-1.jpg'],
+        images: ['/images/womens-dress.png'],
         sizes: ['Standard'],
         colors: ['Red', 'Pink', 'Orange', 'Green'],
         inStock: true,
