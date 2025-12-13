@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { storeInfo } from '@/lib/data'
 
 export default function Footer() {
     return (
@@ -7,9 +8,12 @@ export default function Footer() {
                 <div className="grid md:grid-cols-4 gap-8 mb-8">
                     {/* Company Info */}
                     <div>
-                        <h3 className="text-accent font-serif text-xl font-bold mb-4">Dharsan Groups</h3>
+                        <h3 className="text-accent font-serif text-xl font-bold mb-4">{storeInfo.name}</h3>
                         <p className="text-gray-300 text-sm mb-4">
                             Premium tailoring and fashion brand serving Tirupati and Telugu states with luxury clothing and custom stitching services.
+                        </p>
+                        <p className="text-gray-400 text-xs">
+                            {storeInfo.address}, {storeInfo.city}
                         </p>
                     </div>
 
@@ -42,8 +46,8 @@ export default function Footer() {
                             <Link href="/policies/returns" className="text-gray-300 hover:text-accent transition-colors text-sm">
                                 Returns & Refunds
                             </Link>
-                            <Link href="/faq" className="text-gray-300 hover:text-accent transition-colors text-sm">
-                                FAQ
+                            <Link href="/about" className="text-gray-300 hover:text-accent transition-colors text-sm">
+                                About Us
                             </Link>
                         </div>
                     </div>
@@ -52,14 +56,27 @@ export default function Footer() {
                     <div>
                         <h4 className="font-bold mb-4">Contact</h4>
                         <div className="flex flex-col gap-2 text-sm text-gray-300">
-                            <p>📍 Tirupati, Telugu States</p>
-                            <p>📞 +91 XXX XXX XXXX</p>
-                            <p>✉️ info@dharsangroups.com</p>
                             <a
-                                href="https://wa.me/91XXXXXXXXXX"
+                                href={storeInfo.googleMapsLink}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-accent hover:text-accent-light transition-colors inline-flex items-center gap-2 mt-2"
+                                className="hover:text-accent transition-colors"
+                            >
+                                📍 {storeInfo.address}, {storeInfo.city}
+                            </a>
+                            {storeInfo.phone.map((phone, index) => (
+                                <a key={index} href={`tel:${phone.replace(/\s/g, '')}`} className="hover:text-accent transition-colors">
+                                    📞 {phone}
+                                </a>
+                            ))}
+                            <a href={`mailto:${storeInfo.email}`} className="hover:text-accent transition-colors">
+                                ✉️ {storeInfo.email}
+                            </a>
+                            <a
+                                href={`https://wa.me/${storeInfo.phone[1].replace(/[^0-9]/g, '')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-green-400 hover:text-green-300 transition-colors inline-flex items-center gap-2 mt-2"
                             >
                                 <span>💬 WhatsApp Us</span>
                             </a>
@@ -69,7 +86,7 @@ export default function Footer() {
 
                 <div className="border-t border-primary-light pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-gray-400 text-sm">
-                        © {new Date().getFullYear()} Dharsan Groups. All rights reserved.
+                        © {new Date().getFullYear()} {storeInfo.name}. All rights reserved.
                     </p>
                     <div className="flex gap-6">
                         <Link href="/policies/privacy" className="text-gray-400 hover:text-accent transition-colors text-sm">

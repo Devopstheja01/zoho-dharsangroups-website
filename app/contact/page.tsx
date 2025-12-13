@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { PhoneIcon, EnvelopeIcon, MapPinIcon } from '@heroicons/react/24/outline'
+import { PhoneIcon, EnvelopeIcon, MapPinIcon, ClockIcon } from '@heroicons/react/24/outline'
+import { storeInfo } from '@/lib/data'
 
 export default function ContactPage() {
     const [submitted, setSubmitted] = useState(false)
@@ -34,10 +35,20 @@ export default function ContactPage() {
                                     <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
                                         <MapPinIcon className="w-5 h-5 text-accent" />
                                     </div>
-                                    <h3 className="font-bold">Visit Us</h3>
+                                    <h3 className="font-bold">Visit Our Store</h3>
                                 </div>
-                                <p className="text-gray-700">Tirupati, Andhra Pradesh</p>
-                                <p className="text-gray-700">Telugu States, India</p>
+                                <p className="text-gray-700 font-semibold">{storeInfo.name}</p>
+                                <p className="text-gray-700">{storeInfo.address}</p>
+                                <p className="text-gray-700">{storeInfo.city}, {storeInfo.state}</p>
+                                <p className="text-gray-700">PIN: {storeInfo.pincode}</p>
+                                <a
+                                    href={storeInfo.googleMapsLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-accent hover:underline inline-flex items-center gap-2 mt-2"
+                                >
+                                    📍 Get Directions
+                                </a>
                             </div>
 
                             <div>
@@ -47,12 +58,18 @@ export default function ContactPage() {
                                     </div>
                                     <h3 className="font-bold">Call Us</h3>
                                 </div>
-                                <p className="text-gray-700">+91 XXX XXX XXXX</p>
+                                {storeInfo.phone.map((phone, index) => (
+                                    <p key={index} className="text-gray-700">
+                                        <a href={`tel:${phone.replace(/\s/g, '')}`} className="hover:text-accent">
+                                            {phone}
+                                        </a>
+                                    </p>
+                                ))}
                                 <a
-                                    href="https://wa.me/91XXXXXXXXXX"
+                                    href={`https://wa.me/${storeInfo.phone[1].replace(/[^0-9]/g, '')}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-accent hover:underline inline-flex items-center gap-2 mt-2"
+                                    className="text-green-600 hover:underline inline-flex items-center gap-2 mt-2"
                                 >
                                     💬 WhatsApp Chat
                                 </a>
@@ -65,14 +82,22 @@ export default function ContactPage() {
                                     </div>
                                     <h3 className="font-bold">Email Us</h3>
                                 </div>
-                                <p className="text-gray-700">info@dharsangroups.com</p>
-                                <p className="text-gray-700">support@dharsangroups.com</p>
+                                <p className="text-gray-700">
+                                    <a href={`mailto:${storeInfo.email}`} className="hover:text-accent">
+                                        {storeInfo.email}
+                                    </a>
+                                </p>
                             </div>
 
                             <div className="pt-6 border-t">
-                                <h3 className="font-bold mb-3">Business Hours</h3>
-                                <p className="text-sm text-gray-700">Monday - Saturday: 9 AM - 8 PM</p>
-                                <p className="text-sm text-gray-700">Sunday: 10 AM - 6 PM</p>
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
+                                        <ClockIcon className="w-5 h-5 text-accent" />
+                                    </div>
+                                    <h3 className="font-bold">Business Hours</h3>
+                                </div>
+                                <p className="text-sm text-gray-700">Mon - Sat: {storeInfo.hours.weekdays}</p>
+                                <p className="text-sm text-gray-700">Sunday: {storeInfo.hours.weekends}</p>
                             </div>
                         </div>
                     </div>
@@ -161,9 +186,34 @@ export default function ContactPage() {
 
                 {/* Map */}
                 <div className="mt-12 card p-6">
-                    <h2 className="text-2xl font-bold mb-6">Find Us</h2>
-                    <div className="aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
-                        <p className="text-gray-500">Google Maps - Dharsan Groups, Tirupati</p>
+                    <h2 className="text-2xl font-bold mb-6">Find Us - {storeInfo.name}</h2>
+                    <div className="aspect-video rounded-lg overflow-hidden">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3877.3!2d79.4192!3d13.6288!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a4d4b6eb2cf4ab7%3A0x8b47c6c9c7b12345!2sYadava%20Street%2C%20Varadaraja%20Nagar%2C%20Tirupati%2C%20Andhra%20Pradesh%20517501!5e0!3m2!1sen!2sin!4v1234567890"
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0, minHeight: '400px' }}
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            title="Dharsan Dresses Location"
+                        />
+                    </div>
+                    <div className="mt-4 p-4 bg-accent/5 rounded-lg">
+                        <p className="text-gray-700">
+                            <strong>Address:</strong> {storeInfo.address}, {storeInfo.city}, {storeInfo.state} - {storeInfo.pincode}
+                        </p>
+                        <p className="text-gray-700 mt-2">
+                            <strong>Landmark:</strong> Near R S Junction, Yadava Street
+                        </p>
+                        <a
+                            href={storeInfo.googleMapsLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-primary mt-4 inline-block"
+                        >
+                            📍 Open in Google Maps
+                        </a>
                     </div>
                 </div>
             </div>
