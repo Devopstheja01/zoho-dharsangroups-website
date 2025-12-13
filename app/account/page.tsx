@@ -1,13 +1,31 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCart } from '@/lib/CartContext'
-import { UserIcon, ShoppingBagIcon, MapPinIcon, HeartIcon, CogIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
+import { UserIcon, ShoppingBagIcon, MapPinIcon, HeartIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
 
 export default function AccountPage() {
     const router = useRouter()
     const { user, logout } = useCart()
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    // Show loading state during SSR
+    if (!mounted) {
+        return (
+            <div className="min-h-screen bg-surface flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
+            </div>
+        )
+    }
 
     if (!user) {
         router.push('/login')

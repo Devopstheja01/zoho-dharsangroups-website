@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCart } from '@/lib/CartContext'
@@ -9,13 +9,14 @@ import { CheckCircleIcon } from '@heroicons/react/24/solid'
 export default function CheckoutPage() {
     const router = useRouter()
     const { cart, total, clearCart, user } = useCart()
+    const [mounted, setMounted] = useState(false)
     const [step, setStep] = useState(1)
     const [orderPlaced, setOrderPlaced] = useState(false)
 
     const [shippingInfo, setShippingInfo] = useState({
-        name: user?.name || '',
-        email: user?.email || '',
-        mobile: user?.mobile || '',
+        name: '',
+        email: '',
+        mobile: '',
         address: '',
         city: '',
         state: '',
@@ -24,21 +25,58 @@ export default function CheckoutPage() {
 
     const [paymentMethod, setPaymentMethod] = useState<'upi' | 'cod' | 'card'>('cod')
 
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    // Update shipping info with user data after mount
+    useEffect(() => {
+        if (mounted && user) {
+            setShippingInfo(prev => ({
+                ...prev,
+                name: user.name || '',
+                email: user.email || '',
+                mobile: user.mobile || '',
+            }))
+        }
+    }, [mounted, user])
+
     const shippingCharge = total > 2000 ? 0 : 100
     const finalTotal = total + shippingCharge
 
     const handlePlaceOrder = () => {
-        // Mock order placement
         setOrderPlaced(true)
         setTimeout(() => {
             clearCart()
-            router.push('/account/orders')
+            router.push('/')
         }, 3000)
     }
 
+    // Show loading state during SSR
+    if (!mounted) {
+        return (
+            <div className="min-h-screen bg-surface flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading checkout...</p>
+                </div>
+            </div>
+        )
+    }
+
     if (cart.length === 0 && !orderPlaced) {
-        router.push('/cart')
-        return null
+        return (
+            <div className="min-h-screen bg-surface flex items-center justify-center">
+                <div className="text-center">
+                    <div className="text-6xl mb-4">🛒</div>
+                    <h2 className="text-2xl font-bold mb-2">Your Cart is Empty</h2>
+                    <p className="text-gray-600 mb-6">Add some items to checkout!</p>
+                    <Link href="/shop/men" className="btn btn-primary">
+                        Start Shopping
+                    </Link>
+                </div>
+            </div>
+        )
     }
 
     if (orderPlaced) {
@@ -51,7 +89,7 @@ export default function CheckoutPage() {
                         Your order has been confirmed. You will receive an email confirmation shortly.
                     </p>
                     <p className="text-sm text-gray-500">
-                        Redirecting to orders page...
+                        Redirecting to home page...
                     </p>
                 </div>
             </div>
@@ -218,7 +256,7 @@ export default function CheckoutPage() {
                                 {/* Payment Method */}
                                 <div className="mb-6 pb-6 border-b">
                                     <h3 className="font-semibold mb-3">Payment Method</h3>
-                                    <p className="text-gray-700 capitalize">{paymentMethod.replace('_', ' ')}</p>
+                                    <p className="text-gray-700 capitalize">{paymentMethod === 'cod' ? 'Cash on Delivery' : paymentMethod === 'upi' ? 'UPI Payment' : 'Credit/Debit Card'}</p>
                                 </div>
 
                                 {/* Items */}
