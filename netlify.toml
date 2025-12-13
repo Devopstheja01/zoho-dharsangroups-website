@@ -5,6 +5,11 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Force redeployment by adding environment variable
 [build.environment]
   NODE_VERSION = "18"
+  
+# Ensure images are included
+[[redirects]]
+  from = "/images/*"
+  to = "/images/:splat"
+  status = 200
