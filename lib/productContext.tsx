@@ -64,24 +64,34 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
 
     const updateProduct = (id: string, updates: Partial<Product>) => {
         setProducts(prev => {
-            const newProducts = prev.map(p => p.id === id ? { ...p, ...updates } : p);
+            const index = prev.findIndex(p => p.id === id);
+            if (index === -1) return prev; // Product not found
 
-            // Persist changes to localStorage if it's an admin product
+            const originalProduct = prev[index];
+            const updatedProduct = { ...originalProduct, ...updates };
+
+            const newProducts = [...prev];
+            newProducts[index] = updatedProduct;
+
+            // Persistence: Always save edits to localStorage
+            // If it was a mock product, it effectively becomes an "admin" product now
             if (typeof window !== 'undefined') {
-                const currentAdminProducts = localStorage.getItem('admin_products');
-                if (currentAdminProducts) {
-                    try {
-                        const adminProducts = JSON.parse(currentAdminProducts) as Product[];
-                        // Check if the product being updated exists in localStorage
-                        const existsInAdmin = adminProducts.some(p => p.id === id);
+                try {
+                    const currentAdminProducts = localStorage.getItem('admin_products');
+                    let adminProducts: Product[] = currentAdminProducts ? JSON.parse(currentAdminProducts) : [];
 
-                        if (existsInAdmin) {
-                            const updatedAdminProducts = adminProducts.map(p => p.id === id ? { ...p, ...updates } : p);
-                            localStorage.setItem('admin_products', JSON.stringify(updatedAdminProducts));
-                        }
-                    } catch (e) {
-                        console.error('Failed to update admin products persistence', e);
+                    const adminIndex = adminProducts.findIndex(p => p.id === id);
+                    if (adminIndex >= 0) {
+                        // Update existing admin product
+                        adminProducts[adminIndex] = updatedProduct;
+                    } else {
+                        // "Fork" mock product -> admin product
+                        adminProducts = [updatedProduct, ...adminProducts];
                     }
+
+                    localStorage.setItem('admin_products', JSON.stringify(adminProducts));
+                } catch (e) {
+                    console.error('Failed to update admin products persistence', e);
                 }
             }
             return newProducts;

@@ -137,6 +137,14 @@ export default function AdminPage() {
         setEditingId(null);
         setFormData(initialFormState);
     };
+    // Helper: Generate Smart SKU
+    const generateSKU = (category: string, subcategory: string, name: string) => {
+        const catCode = category.substring(0, 1).toUpperCase(); // M or W
+        const subCode = subcategory.substring(0, 3).toUpperCase(); // SHI, PAN, etc.
+        const nameCode = name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase();
+        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        return `${catCode}-${subCode}-${nameCode}-${random}`; // e.g., M-SHI-PRE-123
+    };
 
     const handleCSVImport = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -145,42 +153,42 @@ export default function AdminPage() {
         const reader = new FileReader();
         reader.onload = (event) => {
             const text = event.target?.result as string;
-            // Simple CSV parser (assumes no commas in fields for now, or use quotes)
+            // Simple parsing: split by lines, then commas. 
             // Header: name,brand,price,category,subcategory,sku,image
             const lines = text.split('\n');
-            const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
-
+            // Skip header (index 0)
             let count = 0;
             for (let i = 1; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if (!line) continue;
-                const values = line.split(',').map(v => v.trim());
 
-                // Map values to headers
-                const p: any = {};
-                headers.forEach((h, index) => {
-                    p[h] = values[index];
-                });
+                // Basic CSV split (Note: doesn't handle commas in quotes)
+                const [pName, pBrand, pPrice, pCat, pSub, pSku] = line.split(',');
 
-                if (p.name) {
+                if (pName && pPrice) {
+                    const cleanName = pName.trim();
+                    const cleanCat = (pCat?.trim().toLowerCase() === 'women' ? 'women' : 'men') as 'women' | 'men';
+                    const cleanSub = pSub?.trim() || 'General';
+                    const cleanSku = pSku?.trim() || generateSKU(cleanCat, cleanSub, cleanName);
+
                     addProduct({
-                        id: handleGenerateId(),
-                        name: p.name,
-                        brand: p.brand || '',
-                        price: Number(p.price) || 0,
-                        category: (p.category === 'women' ? 'women' : 'men'),
-                        subcategory: p.subcategory || 'General',
-                        sku: p.sku || handleGenerateSKU(),
-                        image: p.image || '/images/placeholder.png',
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                        name: cleanName,
+                        brand: pBrand?.trim() || '',
+                        price: Number(pPrice),
+                        category: cleanCat,
+                        subcategory: cleanSub,
+                        sku: cleanSku,
+                        image: '/images/placeholder.png', // Default image
                         inStock: true,
-                        stockQuantity: Number(p.stockquantity) || 10,
+                        stockQuantity: 10,
                         onlineSales: 0,
                         offlineSales: 0
                     } as Product);
                     count++;
                 }
             }
-            alert(`Imported ${count} products successfully!`);
+            alert(`Imported ${count} products!`);
             e.target.value = ''; // Reset input
         };
         reader.readAsText(file);
