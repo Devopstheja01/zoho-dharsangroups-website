@@ -83,5 +83,24 @@ export const adminAuth = {
         users[index].password = newPass;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
         return true;
+    },
+
+    checkSession: (): AdminUser | null => {
+        if (typeof window !== 'undefined') {
+            const sessionStr = localStorage.getItem('admin_session');
+            if (sessionStr) {
+                try {
+                    const session = JSON.parse(sessionStr);
+                    // 5 min timeout
+                    if (Date.now() - session.timestamp < 300000) {
+                        return { username: session.username, role: session.role, id: session.id, createdAt: 0, password: '' };
+                    }
+                    localStorage.removeItem('admin_session');
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+        }
+        return null;
     }
 };

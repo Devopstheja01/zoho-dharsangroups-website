@@ -8,9 +8,14 @@ import { adminAuth, AdminUser } from '@/lib/adminAuth';
 
 export default function AdminPage() {
     const { products, addProduct, updateProduct } = useProducts();
-    const [activeTab, setActiveTab] = useState('products');
+    const [activeTab, setActiveTab] = useState('inventory');
     const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
+
+    // Pagination & Search
+    const [searchTerm, setSearchTerm] = useState('');
+    const [page, setPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(25);
 
     // Auth State
     const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
@@ -21,14 +26,17 @@ export default function AdminPage() {
     const [newUserForm, setNewUserForm] = useState({ username: '', password: '' });
     const [changePassForm, setChangePassForm] = useState('');
 
-    // Fetch users on load (if super admin)
+    useEffect(() => {
+        const session = adminAuth.checkSession();
+        if (session) setCurrentUser(session);
+    }, []);
+
     useEffect(() => {
         if (currentUser?.role === 'SUPER_ADMIN') {
             setUsers(adminAuth.getUsers());
         }
     }, [currentUser, activeTab]);
 
-    // Product Form State
     const initialFormState: Partial<Product> = {
         name: '',
         sku: '',
@@ -37,9 +45,38 @@ export default function AdminPage() {
         subcategory: '',
         price: 0,
         image: '',
-        inStock: true
+        inStock: true,
+        stockQuantity: 10,
+        sizes: []
     };
     const [formData, setFormData] = useState<Partial<Product>>(initialFormState);
+
+    // Derived State
+    const filteredProducts = products.filter(p =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (p.brand || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.sku?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const displayedProducts = filteredProducts.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+    // Size Logic
+    const handleSizeChange = (size: string) => {
+        const currentSizes = formData.sizes || [];
+        if (currentSizes.includes(size)) {
+            setFormData({ ...formData, sizes: currentSizes.filter(s => s !== size) });
+        } else {
+            setFormData({ ...formData, sizes: [...currentSizes, size] });
+        }
+    };
+
+    const getAvailableSizes = (subcategory: string = '') => {
+        const sub = subcategory.toLowerCase();
+        if (sub.includes('pant') || sub.includes('trouser')) {
+            return ['28', '30', '32', '34', '36', '38', '40'];
+        }
+        return ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+    };
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
@@ -237,11 +274,8 @@ export default function AdminPage() {
         handleLogout();
     };
 
-    // Pagination
-    const [page, setPage] = useState(1);
-    const itemsPerPage = 8;
-    const totalPages = Math.ceil(products.length / itemsPerPage);
-    const displayedProducts = products.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+    // Pagination variables are already defined at top scope
+    // Removed duplicate declarations
 
     if (!currentUser) {
         return (

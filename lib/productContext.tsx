@@ -42,7 +42,43 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
             const localIds = new Set(localProducts.map(p => p.id));
             const filteredBase = allBaseProducts.filter(p => !localIds.has(p.id));
 
-            setProducts([...localProducts, ...filteredBase]);
+            let merged = [...localProducts, ...filteredBase];
+
+            // 4. Backfill Missing SKUs
+            let hasUpdates = false;
+            const generateSKU = (p: Product) => {
+                const cat = (p.category || 'GEN').substring(0, 1).toUpperCase();
+                const sub = (p.subcategory || 'GEN').substring(0, 3).toUpperCase();
+                const nam = p.name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase();
+                const rnd = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+                return `${cat}-${sub}-${nam}-${rnd}`;
+            };
+
+            merged = merged.map(p => {
+                if (!p.sku) {
+                    hasUpdates = true;
+                    return { ...p, sku: generateSKU(p) };
+                }
+                return p;
+            });
+
+            if (hasUpdates && typeof window !== 'undefined') {
+                // We only persist the "admin" products (localProducts) + any base products that we modified
+                // Ideally we should just modify the session data, but to persist across reloads we need to save to localStorage
+                // For simplicity, we'll just save the ones that were missing SKUs into localStorage if they aren't there
+                const updatesToSave = merged.filter(p => localIds.has(p.id) || !p.sku); // Actually just save all is safer for prototype
+                // Let's just save the overrides like updateProduct
+                try {
+                    // Find products that got a new SKU and weren't in admin_products before
+                    const newAdminProducts = merged.filter(p => hasUpdates && !localIds.has(p.id) && allBaseProducts.find(bp => bp.id === p.id));
+                    const finalAdminList = [...localProducts, ...newAdminProducts];
+                    localStorage.setItem('admin_products', JSON.stringify(finalAdminList));
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            setProducts(merged);
             setIsLoading(false);
         };
 
