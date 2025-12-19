@@ -254,7 +254,7 @@ export default function ShopCategory({ params }: { params: { category: string } 
                 onLogin={handleLogin}
             />
 
-            <Footer />
+
         </main>
     );
 }
