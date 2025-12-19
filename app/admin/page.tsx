@@ -11,9 +11,14 @@ export default function AdminPage() {
     const [activeTab, setActiveTab] = useState('products');
     const [isAdding, setIsAdding] = useState(false);
 
+    // Auth State
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [password, setPassword] = useState('');
+
     // Form State
     const [formData, setFormData] = useState<Partial<Product>>({
         name: '',
+        sku: '',
         category: 'men',
         subcategory: '',
         price: 0,
@@ -21,8 +26,49 @@ export default function AdminPage() {
         inStock: true
     });
 
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (password === 'admin123') {
+            setIsAuthenticated(true);
+        } else {
+            alert('Invalid Password');
+        }
+    };
+
     const handleGenerateId = () => {
         return Math.random().toString(36).substr(2, 9);
+    };
+
+    const handleGenerateSKU = () => {
+        const prefix = formData.category === 'men' ? 'MN' : 'WM';
+        const random = Math.floor(1000 + Math.random() * 9000);
+        return `${prefix}-${random}`;
+    };
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validation 1: Size (Max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            alert('File size too large! Please upload an image under 2MB.');
+            e.target.value = ''; // Reset input
+            return;
+        }
+
+        // Validation 2: Type
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            alert('Invalid format! Please upload JPG or PNG.');
+            e.target.value = '';
+            return;
+        }
+
+        // Convert to Base64
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setFormData(prev => ({ ...prev, image: reader.result as string }));
+        };
+        reader.readAsDataURL(file);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -31,6 +77,7 @@ export default function AdminPage() {
         const newProduct: Product = {
             id: handleGenerateId(),
             name: formData.name || 'Untitled Product',
+            sku: formData.sku || handleGenerateSKU(),
             category: (formData.category as 'men' | 'women') || 'men',
             subcategory: formData.subcategory || 'General',
             price: Number(formData.price) || 0,
@@ -43,6 +90,7 @@ export default function AdminPage() {
         setIsAdding(false);
         setFormData({
             name: '',
+            sku: '',
             category: 'men',
             subcategory: '',
             price: 0,
@@ -56,6 +104,30 @@ export default function AdminPage() {
     const itemsPerPage = 10;
     const totalPages = Math.ceil(products.length / itemsPerPage);
     const displayedProducts = products.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+                <form onSubmit={handleLogin} className="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
+                    <h2 className="text-2xl font-bold mb-6 text-center">Admin Login</h2>
+                    <div className="mb-4">
+                        <label className="block text-sm font-semibold mb-2">Password</label>
+                        <input
+                            type="password"
+                            className="input w-full p-3 border rounded-lg"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Enter Admin Password"
+                        />
+                    </div>
+                    <button type="submit" className="btn btn-primary w-full py-3 rounded-lg font-bold">
+                        Login
+                    </button>
+                    <p className="text-center text-xs text-gray-400 mt-4">Hint: admin123</p>
+                </form>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.adminLayout}>
@@ -111,6 +183,15 @@ export default function AdminPage() {
                                             />
                                         </div>
                                         <div>
+                                            <label className="block text-sm font-bold mb-1">SKU (Optional)</label>
+                                            <input
+                                                className="input w-full p-2 border rounded"
+                                                value={formData.sku}
+                                                onChange={e => setFormData({ ...formData, sku: e.target.value })}
+                                                placeholder="Auto-generated if empty"
+                                            />
+                                        </div>
+                                        <div>
                                             <label className="block text-sm font-bold mb-1">Category</label>
                                             <select
                                                 className="input w-full p-2 border rounded"
@@ -142,14 +223,22 @@ export default function AdminPage() {
                                             />
                                         </div>
                                         <div className="col-span-2">
-                                            <label className="block text-sm font-bold mb-1">Image URL</label>
+                                            <label className="block text-sm font-bold mb-1">Product Image</label>
                                             <input
-                                                className="input w-full p-2 border rounded"
-                                                value={formData.image}
-                                                onChange={e => setFormData({ ...formData, image: e.target.value })}
-                                                placeholder="https://example.com/image.jpg"
+                                                type="file"
+                                                accept="image/png, image/jpeg, image/webp"
+                                                className="input w-full p-2 border rounded bg-white"
+                                                onChange={handleImageUpload}
                                             />
-                                            <p className="text-xs text-gray-500 mt-1">Leave empty for placeholder</p>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Required: JPG/PNG, Max 2MB. Aspect Ratio 3:4 recommended for best display.
+                                            </p>
+                                            {formData.image && (
+                                                <div className="mt-2">
+                                                    <p className="text-xs text-green-600 mb-1">✓ Image Selected</p>
+                                                    <img src={formData.image} alt="Preview" className="h-20 w-auto rounded border" />
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                     <button type="submit" className="btn btn-primary w-full mt-4">Save Product</button>
@@ -161,6 +250,7 @@ export default function AdminPage() {
                                     <thead>
                                         <tr>
                                             <th>Product</th>
+                                            <th>SKU</th>
                                             <th>Category</th>
                                             <th>Price</th>
                                             <th>Stock</th>
@@ -171,10 +261,18 @@ export default function AdminPage() {
                                             <tr key={p.id}>
                                                 <td>
                                                     <div className="flex items-center gap-2">
-                                                        <img src={p.image} className="w-8 h-8 rounded object-cover" alt="" />
-                                                        {p.name}
+                                                        <img
+                                                            src={p.image}
+                                                            className="w-10 h-10 rounded object-cover border"
+                                                            alt=""
+                                                            onError={(e) => {
+                                                                (e.target as HTMLImageElement).src = `https://placehold.co/100x100?text=${p.name.charAt(0)}`;
+                                                            }}
+                                                        />
+                                                        <span className="font-medium">{p.name}</span>
                                                     </div>
                                                 </td>
+                                                <td className="font-mono text-sm text-gray-600">{p.sku || '-'}</td>
                                                 <td>{p.category}</td>
                                                 <td>₹{p.price}</td>
                                                 <td>
@@ -188,10 +286,22 @@ export default function AdminPage() {
                                 </table>
                             </div>
 
-                            <div className={styles.pagination}>
-                                <button disabled={page === 1} onClick={() => setPage(page - 1)}>Prev</button>
-                                <span className="mx-2">Page {page} of {totalPages}</span>
-                                <button disabled={page === totalPages} onClick={() => setPage(page + 1)}>Next</button>
+                            <div className="pagination flex justify-center items-center gap-4 mt-6">
+                                <button
+                                    className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                                    disabled={page === 1}
+                                    onClick={() => setPage(page - 1)}
+                                >
+                                    Previous
+                                </button>
+                                <span className="text-sm font-medium">Page {page} of {totalPages}</span>
+                                <button
+                                    className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                                    disabled={page === totalPages}
+                                    onClick={() => setPage(page + 1)}
+                                >
+                                    Next
+                                </button>
                             </div>
                         </div>
                     )}

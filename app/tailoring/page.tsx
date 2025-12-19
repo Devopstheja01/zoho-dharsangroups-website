@@ -86,6 +86,25 @@ export default function TailoringPage() {
         );
     };
 
+    const handleSimulateLocation = () => {
+        setLocationStatus('loading');
+        // Simulate waiting
+        setTimeout(() => {
+            // Tirupati Coordinates
+            const lat = 13.6288;
+            const lng = 79.4192;
+            setUserLocation({ lat, lng });
+
+            const sortedShops = PARTNER_SHOPS.map(shop => ({
+                ...shop,
+                distance: calculateDistance(lat, lng, shop.lat, shop.lng)
+            })).sort((a, b) => a.distance - b.distance);
+
+            setNearbyShops(sortedShops);
+            setLocationStatus('success');
+        }, 800);
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         setSubmitted(true)
@@ -155,6 +174,12 @@ export default function TailoringPage() {
                         >
                             <MapPinIcon className="w-5 h-5" />
                             {locationStatus === 'loading' ? 'Locating...' : 'Use My Location'}
+                        </button>
+                    </div>
+                    {/* Demo Feature */}
+                    <div className="mb-6 flex justify-end">
+                        <button onClick={handleSimulateLocation} className="text-xs text-blue-500 underline">
+                            (Demo) Simulate location in Tirupati
                         </button>
                     </div>
 
