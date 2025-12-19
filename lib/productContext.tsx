@@ -24,7 +24,7 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
             const mockData = generateMockProducts();
             const allBaseProducts = [...initialStaticProducts, ...mockData];
 
-            // 2. Get LocalStorage Data (Admin added products)
+            // 2. Get LocalStorage Data (Admin added products + Overrides)
             let localProducts: Product[] = [];
             if (typeof window !== 'undefined') {
                 const saved = localStorage.getItem('admin_products');
@@ -37,9 +37,12 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
                 }
             }
 
-            // 3. Merge
-            // We prepend localProducts so they appear first
-            setProducts([...localProducts, ...allBaseProducts]);
+            // 3. Merge: Filter out base products that have been overridden by localProducts
+            // This prevents duplicate keys and ensures the "edited" version is the one shown
+            const localIds = new Set(localProducts.map(p => p.id));
+            const filteredBase = allBaseProducts.filter(p => !localIds.has(p.id));
+
+            setProducts([...localProducts, ...filteredBase]);
             setIsLoading(false);
         };
 

@@ -38,6 +38,10 @@ export const products: Product[] = [
         sizes: ['S', 'M', 'L', 'XL'],
         colors: ['White', 'Blue'],
         inStock: true,
+        stockQuantity: 15,
+        onlineSales: 2,
+        offlineSales: 1,
+        sku: 'MEN-SHI-PRE-001',
         rating: 4.5,
         reviewCount: 12,
         customStitchingAvailable: true
@@ -50,6 +54,10 @@ export const products: Product[] = [
         subcategory: 'Pants',
         image: '/images/mens-pants.png',
         inStock: true,
+        stockQuantity: 20,
+        onlineSales: 0,
+        offlineSales: 0,
+        sku: 'MEN-PAN-TAI-002',
         sizes: ['30', '32', '34', '36'],
         customStitchingAvailable: true
     },
@@ -61,6 +69,10 @@ export const products: Product[] = [
         subcategory: 'Shirts',
         image: '/images/mens-shirt.png',
         inStock: true,
+        stockQuantity: 10,
+        onlineSales: 0,
+        offlineSales: 0,
+        sku: 'MEN-SHI-CLA-003',
         sizes: ['S', 'M', 'L'],
     },
     {
@@ -72,6 +84,10 @@ export const products: Product[] = [
         subcategory: 'Wedding',
         image: '/images/mens-wedding.png',
         inStock: true,
+        stockQuantity: 5,
+        onlineSales: 0,
+        offlineSales: 0,
+        sku: 'MEN-WED-SHE-004',
         customStitchingAvailable: true,
         description: 'Exquisite wedding sherwani with intricate embroidery.'
     },
@@ -83,6 +99,10 @@ export const products: Product[] = [
         subcategory: 'Ethnic',
         image: '/images/mens-shirt.png',
         inStock: true,
+        stockQuantity: 12,
+        onlineSales: 0,
+        offlineSales: 0,
+        sku: 'MEN-ETH-TRA-005',
     },
     {
         id: 'm6',
@@ -92,6 +112,10 @@ export const products: Product[] = [
         subcategory: 'Pants',
         image: '/images/mens-pants.png',
         inStock: true,
+        stockQuantity: 18,
+        onlineSales: 0,
+        offlineSales: 0,
+        sku: 'MEN-PAN-OFF-006',
     },
     // Women's Products
     {
@@ -102,6 +126,10 @@ export const products: Product[] = [
         subcategory: 'Sarees',
         image: '/images/womens-saree.png',
         inStock: true,
+        stockQuantity: 8,
+        onlineSales: 0,
+        offlineSales: 0,
+        sku: 'WOM-SAR-KAN-001',
         description: 'Authentic Kanchipuram silk saree with rich border.'
     },
     {
@@ -112,6 +140,10 @@ export const products: Product[] = [
         subcategory: 'Dresses',
         image: '/images/womens-dress.png',
         inStock: true,
+        stockQuantity: 10,
+        onlineSales: 0,
+        offlineSales: 0,
+        sku: 'WOM-DRE-DES-002',
     },
     {
         id: 'w3',
@@ -121,6 +153,10 @@ export const products: Product[] = [
         subcategory: 'Sarees',
         image: '/images/womens-cotton.png',
         inStock: true,
+        stockQuantity: 15,
+        onlineSales: 0,
+        offlineSales: 0,
+        sku: 'WOM-SAR-COT-003',
     },
     {
         id: 'w4',
@@ -130,6 +166,10 @@ export const products: Product[] = [
         subcategory: 'Dresses',
         image: '/images/womens-dress.png',
         inStock: true,
+        stockQuantity: 10,
+        onlineSales: 0,
+        offlineSales: 0,
+        sku: 'WOM-DRE-ELE-004',
     },
     {
         id: 'w5',
@@ -139,6 +179,10 @@ export const products: Product[] = [
         subcategory: 'Sarees',
         image: '/images/womens-saree.png',
         inStock: true,
+        stockQuantity: 6,
+        onlineSales: 0,
+        offlineSales: 0,
+        sku: 'WOM-SAR-PAT-005',
     },
     {
         id: 'w6',
@@ -148,6 +192,10 @@ export const products: Product[] = [
         subcategory: 'Dresses',
         image: '/images/womens-dress.png',
         inStock: true,
+        stockQuantity: 10,
+        onlineSales: 0,
+        offlineSales: 0,
+        sku: 'WOM-DRE-FUS-006',
     },
 ];
 
