@@ -38,7 +38,10 @@ export function generateMockProducts(): Product[] {
             category: 'men',
             subcategory: type.sub,
             image: `https://placehold.co/400x600/1a1a1a/FFF?text=${encodeURIComponent(type.name)}`,
-            inStock: Math.random() > 0.1 // 90% in stock
+            inStock: Math.random() > 0.1, // 90% in stock
+            stockQuantity: 25,
+            onlineSales: Math.floor(Math.random() * 5),
+            offlineSales: Math.floor(Math.random() * 5)
         });
     }
 
@@ -52,7 +55,10 @@ export function generateMockProducts(): Product[] {
             category: 'women',
             subcategory: type.sub,
             image: `https://placehold.co/400x600/e91e63/FFF?text=${encodeURIComponent(type.name)}`,
-            inStock: Math.random() > 0.1
+            inStock: Math.random() > 0.1,
+            stockQuantity: 20,
+            onlineSales: Math.floor(Math.random() * 3),
+            offlineSales: Math.floor(Math.random() * 3)
         });
     }
 

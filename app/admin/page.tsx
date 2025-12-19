@@ -101,7 +101,10 @@ export default function AdminPage() {
                 subcategory: formData.subcategory || 'General',
                 price: Number(formData.price) || 0,
                 image: formData.image || 'https://placehold.co/400x600?text=No+Image',
-                inStock: formData.inStock ?? true
+                inStock: formData.inStock ?? true,
+                stockQuantity: Number(formData.stockQuantity) || 10,
+                onlineSales: 0,
+                offlineSales: 0
             };
             addProduct(newProduct);
             alert('Product added successfully!');
@@ -118,7 +121,10 @@ export default function AdminPage() {
             subcategory: product.subcategory,
             price: product.price,
             image: product.image,
-            inStock: product.inStock
+            inStock: product.inStock,
+            stockQuantity: product.stockQuantity,
+            onlineSales: product.onlineSales,
+            offlineSales: product.offlineSales
         });
         setEditingId(product.id);
         setIsAdding(true);
@@ -166,7 +172,10 @@ export default function AdminPage() {
                         subcategory: p.subcategory || 'General',
                         sku: p.sku || handleGenerateSKU(),
                         image: p.image || '/images/placeholder.png',
-                        inStock: true
+                        inStock: true,
+                        stockQuantity: Number(p.stockquantity) || 10,
+                        onlineSales: 0,
+                        offlineSales: 0
                     } as Product);
                     count++;
                 }
@@ -175,6 +184,13 @@ export default function AdminPage() {
             e.target.value = ''; // Reset input
         };
         reader.readAsText(file);
+    };
+
+    const handleOfflineSale = (product: Product) => {
+        if (!confirm(`Record 1 offline sale for "${product.name}"?`)) return;
+
+        const currentOffline = product.offlineSales || 0;
+        updateProduct(product.id, { offlineSales: currentOffline + 1 });
     };
 
     // User Management Handlers
@@ -373,10 +389,14 @@ export default function AdminPage() {
                                             <input type="number" className="input w-full p-2 border rounded" value={formData.price} onChange={e => setFormData({ ...formData, price: Number(e.target.value) })} />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold mb-1">Stock Status</label>
+                                            <label className="block text-sm font-bold mb-1">Total Stock</label>
+                                            <input type="number" className="input w-full p-2 border rounded" value={formData.stockQuantity} onChange={e => setFormData({ ...formData, stockQuantity: Number(e.target.value) })} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold mb-1">Status</label>
                                             <select className="input w-full p-2 border rounded" value={formData.inStock ? 'true' : 'false'} onChange={e => setFormData({ ...formData, inStock: e.target.value === 'true' })}>
-                                                <option value="true">In Stock</option>
-                                                <option value="false">Out of Stock</option>
+                                                <option value="true">Active</option>
+                                                <option value="false">Inactive</option>
                                             </select>
                                         </div>
                                         <div className="col-span-2">
@@ -398,32 +418,57 @@ export default function AdminPage() {
                                             <th>SKU</th>
                                             <th>Category</th>
                                             <th>Price</th>
-                                            <th>Status</th>
+                                            <th>Stock (Avail/Tot)</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {displayedProducts.map(p => (
-                                            <tr key={p.id}>
-                                                <td className="flex items-center gap-2">
-                                                    <img src={p.image} className="w-8 h-8 rounded border object-cover" onError={(e: any) => { e.target.src = 'https://placehold.co/50' }} />
-                                                    <span className="text-sm font-medium">{p.name}</span>
-                                                </td>
-                                                <td className="text-sm text-gray-600">{p.brand || '-'}</td>
-                                                <td className="text-xs font-mono text-gray-500">{p.sku}</td>
-                                                <td className="text-sm">{p.category}/{p.subcategory}</td>
-                                                <td className="text-sm font-bold">₹{p.price}</td>
-                                                <td><span className={`text-xs px-2 py-1 rounded ${p.inStock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{p.inStock ? 'Stock' : 'Out'}</span></td>
-                                                <td>
-                                                    <button
-                                                        onClick={() => handleEdit(p)}
-                                                        className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 border border-blue-200"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {displayedProducts.map(p => {
+                                            const total = p.stockQuantity || 0;
+                                            const sold = (p.onlineSales || 0) + (p.offlineSales || 0);
+                                            const available = Math.max(0, total - sold);
+
+                                            return (
+                                                <tr key={p.id}>
+                                                    <td className="flex items-center gap-2">
+                                                        <img src={p.image} className="w-8 h-8 rounded border object-cover" onError={(e: any) => { e.target.src = 'https://placehold.co/50' }} />
+                                                        <span className="text-sm font-medium">{p.name}</span>
+                                                    </td>
+                                                    <td className="text-sm text-gray-600">{p.brand || '-'}</td>
+                                                    <td className="text-xs font-mono text-gray-500">{p.sku}</td>
+                                                    <td className="text-sm">{p.category}/{p.subcategory}</td>
+                                                    <td className="text-sm font-bold">₹{p.price}</td>
+                                                    <td>
+                                                        <div className="flex flex-col">
+                                                            <span className={`font-bold ${available < 3 ? 'text-red-600' : 'text-green-600'}`}>
+                                                                {available} / {total}
+                                                            </span>
+                                                            <span className="text-[10px] text-gray-500">
+                                                                (On:{p.onlineSales || 0} | Off:{p.offlineSales || 0})
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() => handleOfflineSale(p)}
+                                                                disabled={available <= 0}
+                                                                className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded hover:bg-orange-200 border border-orange-200 disabled:opacity-50"
+                                                                title="Record Offline Sale"
+                                                            >
+                                                                -1 Sold
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleEdit(p)}
+                                                                className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 border border-blue-200"
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

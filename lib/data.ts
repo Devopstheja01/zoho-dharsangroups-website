@@ -16,7 +16,11 @@ export interface Product {
     rating?: number;
     reviewCount?: number;
     customStitchingAvailable?: boolean;
-    stockCount?: number;
+
+    // Inventory Tracking
+    stockQuantity?: number; // Total initial stock
+    onlineSales?: number;
+    offlineSales?: number;
 }
 
 export const products: Product[] = [
