@@ -1,7 +1,6 @@
 'use client';
 
 import FilterSidebar from '@/components/FilterSidebar';
-import AuthModal from '@/components/AuthModal';
 import Link from 'next/link';
 import styles from './page.module.css';
 import { notFound } from 'next/navigation';
@@ -19,9 +18,7 @@ export default function ShopCategory({ params }: { params: { category: string } 
     }
 
     const { products, isLoading } = useProducts();
-    const { addToCart, user, login, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [pendingProduct, setPendingProduct] = useState<Product | null>(null);
+    const { user, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
 
     // State for filters and pagination
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -61,30 +58,6 @@ export default function ShopCategory({ params }: { params: { category: string } 
             prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
         );
         setCurrentPage(1);
-    };
-
-    const handleAddToCart = (product: Product) => {
-        if (!user) {
-            setPendingProduct(product);
-            setIsAuthModalOpen(true);
-        } else {
-            addToCart(product);
-            alert('Item added to cart!');
-        }
-    };
-
-    const handleLogin = (mobile: string) => {
-        login({
-            id: Date.now().toString(),
-            email: `${mobile}@customer.com`,
-            name: 'Customer',
-            mobile: mobile
-        });
-        if (pendingProduct) {
-            addToCart(pendingProduct);
-            setPendingProduct(null);
-            alert('Item added to cart!');
-        }
     };
 
     // Generate page numbers for display (sliding window or simple range)
@@ -250,11 +223,7 @@ export default function ShopCategory({ params }: { params: { category: string } 
                 </div>
             </div>
 
-            <AuthModal
-                isOpen={isAuthModalOpen}
-                onClose={() => setIsAuthModalOpen(false)}
-                onLogin={handleLogin}
-            />
+
 
 
         </main>
