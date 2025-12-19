@@ -110,13 +110,21 @@ function CategoryCard({ title, description, image, href }: {
     href: string
 }) {
     return (
-        <Link href={href} className="card card-hover group">
-            <div className="aspect-[4/3] bg-gray-200 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent z-10"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
-                    <h3 className="text-2xl font-bold text-white mb-2">{title}</h3>
-                    <p className="text-gray-200">{description}</p>
-                </div>
+        <Link href={href} className="card card-hover group block relative h-[400px] overflow-hidden rounded-xl">
+            <Image
+                src={image}
+                alt={title}
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 opacity-90 group-hover:opacity-100 transition-opacity"></div>
+            <div className="absolute bottom-0 left-0 right-0 p-8 z-20 transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                <h3 className="text-3xl font-bold text-white mb-3">{title}</h3>
+                <p className="text-gray-200 text-lg opacity-90">{description}</p>
+                <span className="inline-block mt-4 text-white font-semibold underline decoration-accent underline-offset-4 opacity-0 group-hover:opacity-100 transition-opacity delay-100">
+                    Explore Collection →
+                </span>
             </div>
         </Link>
     )
