@@ -63,9 +63,29 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
     };
 
     const updateProduct = (id: string, updates: Partial<Product>) => {
-        setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
-        // Note: Updating mock data won't persist, but updating admin data should.
-        // For this demo, we'll keep it simple.
+        setProducts(prev => {
+            const newProducts = prev.map(p => p.id === id ? { ...p, ...updates } : p);
+
+            // Persist changes to localStorage if it's an admin product
+            if (typeof window !== 'undefined') {
+                const currentAdminProducts = localStorage.getItem('admin_products');
+                if (currentAdminProducts) {
+                    try {
+                        const adminProducts = JSON.parse(currentAdminProducts) as Product[];
+                        // Check if the product being updated exists in localStorage
+                        const existsInAdmin = adminProducts.some(p => p.id === id);
+
+                        if (existsInAdmin) {
+                            const updatedAdminProducts = adminProducts.map(p => p.id === id ? { ...p, ...updates } : p);
+                            localStorage.setItem('admin_products', JSON.stringify(updatedAdminProducts));
+                        }
+                    } catch (e) {
+                        console.error('Failed to update admin products persistence', e);
+                    }
+                }
+            }
+            return newProducts;
+        });
     };
 
     return (

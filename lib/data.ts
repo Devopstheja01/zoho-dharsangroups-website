@@ -8,6 +8,7 @@ export interface Product {
     image: string;
     images?: string[]; // Optional array for gallery
     description?: string;
+    brand?: string;
     sku?: string;
     sizes?: string[];
     colors?: string[];
