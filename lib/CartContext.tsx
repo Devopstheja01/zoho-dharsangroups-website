@@ -21,11 +21,15 @@ export interface User {
 
 interface CartContextType {
     cart: CartItem[]
+    wishlist: CartItem[]
     user: User | null
     addToCart: (item: Omit<CartItem, 'quantity'>) => void
     removeFromCart: (id: string, size: string) => void
     updateQuantity: (id: string, size: string, quantity: number) => void
     clearCart: () => void
+    addToWishlist: (item: Omit<CartItem, 'quantity' | 'size'>) => void
+    removeFromWishlist: (id: string) => void
+    isInWishlist: (id: string) => boolean
     login: (user: User) => void
     logout: () => void
     total: number
@@ -35,14 +39,18 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [cart, setCart] = useState<CartItem[]>([])
+    const [wishlist, setWishlist] = useState<CartItem[]>([])
     const [user, setUser] = useState<User | null>(null)
 
-    // Load cart and user from localStorage on mount
+    // Load cart, wishlist and user from localStorage on mount
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const savedCart = localStorage.getItem('cart')
+            const savedWishlist = localStorage.getItem('wishlist')
             const savedUser = localStorage.getItem('user')
+
             if (savedCart) setCart(JSON.parse(savedCart))
+            if (savedWishlist) setWishlist(JSON.parse(savedWishlist))
             if (savedUser) setUser(JSON.parse(savedUser))
         }
     }, [])
@@ -53,6 +61,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             localStorage.setItem('cart', JSON.stringify(cart))
         }
     }, [cart])
+
+    // Save wishlist to localStorage whenever it changes
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('wishlist', JSON.stringify(wishlist))
+        }
+    }, [wishlist])
 
     // Save user to localStorage whenever it changes
     useEffect(() => {
@@ -66,13 +81,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }, [user])
 
     const addToCart = (item: Omit<CartItem, 'quantity'>) => {
-        setCart(prevCart => {
+        setCart((prevCart: CartItem[]) => {
             const existingItem = prevCart.find(
-                cartItem => cartItem.id === item.id && cartItem.size === item.size
+                (cartItem: CartItem) => cartItem.id === item.id && cartItem.size === item.size
             )
 
             if (existingItem) {
-                return prevCart.map(cartItem =>
+                return prevCart.map((cartItem: CartItem) =>
                     cartItem.id === item.id && cartItem.size === item.size
                         ? { ...cartItem, quantity: cartItem.quantity + 1 }
                         : cartItem
@@ -84,8 +99,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     const removeFromCart = (id: string, size: string) => {
-        setCart(prevCart => prevCart.filter(
-            item => !(item.id === id && item.size === size)
+        setCart((prevCart: CartItem[]) => prevCart.filter(
+            (item: CartItem) => !(item.id === id && item.size === size)
         ))
     }
 
@@ -95,8 +110,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             return
         }
 
-        setCart(prevCart =>
-            prevCart.map(item =>
+        setCart((prevCart: CartItem[]) =>
+            prevCart.map((item: CartItem) =>
                 item.id === id && item.size === size
                     ? { ...item, quantity }
                     : item
@@ -106,21 +121,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const clearCart = () => setCart([])
 
+    // Wishlist Logic
+    const addToWishlist = (item: Omit<CartItem, 'quantity' | 'size'>) => {
+        setWishlist((prev: CartItem[]) => {
+            if (prev.some((i: CartItem) => i.id === item.id)) return prev;
+            // Store with default props
+            return [...prev, { ...item, size: 'M', quantity: 1 }];
+        });
+    }
+
+    const removeFromWishlist = (id: string) => {
+        setWishlist((prev: CartItem[]) => prev.filter((item: CartItem) => item.id !== id));
+    }
+
+    const isInWishlist = (id: string) => {
+        return wishlist.some((item: CartItem) => item.id === id);
+    }
+
     const login = (newUser: User) => setUser(newUser)
 
     const logout = () => setUser(null)
 
-    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const total = cart.reduce((sum: number, item: CartItem) => sum + item.price * item.quantity, 0)
 
     return (
         <CartContext.Provider
             value={{
                 cart,
+                wishlist,
                 user,
                 addToCart,
                 removeFromCart,
                 updateQuantity,
                 clearCart,
+                addToWishlist,
+                removeFromWishlist,
+                isInWishlist,
                 login,
                 logout,
                 total,
@@ -138,3 +174,4 @@ export function useCart() {
     }
     return context
 }
+

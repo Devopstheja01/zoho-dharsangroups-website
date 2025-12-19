@@ -3,6 +3,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { CartProvider } from '@/lib/CartContext'
+import { ProductProvider } from '@/lib/productContext'
 
 export const metadata: Metadata = {
     title: 'Dharsan Groups - Premium Tailoring & Fashion | Tirupati',
@@ -18,14 +19,17 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body>
-                <CartProvider>
-                    <Navbar />
-                    <main className="min-h-screen">
-                        {children}
-                    </main>
-                    <Footer />
-                </CartProvider>
+                <ProductProvider>
+                    <CartProvider>
+                        <Navbar />
+                        <main className="min-h-screen">
+                            {children}
+                        </main>
+                        <Footer />
+                    </CartProvider>
+                </ProductProvider>
             </body>
         </html>
     )
 }
+

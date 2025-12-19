@@ -2,11 +2,25 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { CheckCircleIcon, ScissorsIcon } from '@heroicons/react/24/outline'
+import { CheckCircleIcon, ScissorsIcon, MapPinIcon } from '@heroicons/react/24/outline'
+
+// Mock Partner Shops
+const PARTNER_SHOPS = [
+    { id: 1, name: 'Lakshmi Tailors', area: 'Tirupati Central', lat: 13.6288, lng: 79.4192, rating: 4.8 },
+    { id: 2, name: 'Venkateswara Stitching', area: 'Renigunta Road', lat: 13.6420, lng: 79.4440, rating: 4.5 },
+    { id: 3, name: 'Modern Fits', area: 'Alipiri', lat: 13.6550, lng: 79.4000, rating: 4.6 },
+    { id: 4, name: 'Royal Cuts', area: 'Chandragiri', lat: 13.5900, lng: 79.3100, rating: 4.7 }
+];
 
 export default function TailoringPage() {
     const [submitted, setSubmitted] = useState(false)
     const [visitType, setVisitType] = useState<'store' | 'home'>('store')
+
+    // Geolocation State
+    const [locationStatus, setLocationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [nearbyShops, setNearbyShops] = useState<any[]>([]);
+    const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null);
+
     const [formData, setFormData] = useState({
         name: '',
         mobile: '',
@@ -25,6 +39,53 @@ export default function TailoringPage() {
         notes: '',
     })
 
+    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+        const R = 6371; // Radius of the earth in km
+        const dLat = deg2rad(lat2 - lat1);
+        const dLon = deg2rad(lon2 - lon1);
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const d = R * c; // Distance in km
+        return d;
+    }
+
+    const deg2rad = (deg: number) => {
+        return deg * (Math.PI / 180)
+    }
+
+    const handleGetLocation = () => {
+        setLocationStatus('loading');
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by your browser');
+            setLocationStatus('error');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                setUserLocation({ lat: latitude, lng: longitude });
+
+                // Sort shops by distance
+                const sortedShops = PARTNER_SHOPS.map(shop => ({
+                    ...shop,
+                    distance: calculateDistance(latitude, longitude, shop.lat, shop.lng)
+                })).sort((a, b) => a.distance - b.distance);
+
+                setNearbyShops(sortedShops);
+                setLocationStatus('success');
+            },
+            (error) => {
+                console.error(error);
+                alert('Unable to retrieve your location');
+                setLocationStatus('error');
+            }
+        );
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         setSubmitted(true)
@@ -32,14 +93,14 @@ export default function TailoringPage() {
 
     if (submitted) {
         return (
-            <div className="min-h-screen bg-surface flex items-center justify-center">
-                <div className="card p-12 text-center max-w-md">
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl shadow-lg p-12 text-center max-w-md w-full">
                     <CheckCircleIcon className="w-20 h-20 text-green-500 mx-auto mb-6" />
                     <h2 className="text-2xl font-bold mb-4">Booking Confirmed!</h2>
                     <p className="text-gray-600 mb-6">
                         We've received your tailoring request. Our team will contact you within 24 hours.
                     </p>
-                    <Link href="/" className="btn btn-primary">
+                    <Link href="/" className="btn btn-primary w-full block">
                         Back to Home
                     </Link>
                 </div>
@@ -48,12 +109,12 @@ export default function TailoringPage() {
     }
 
     return (
-        <div className="min-h-screen bg-surface py-12">
-            <div className="container-custom max-w-4xl">
+        <div className="min-h-screen bg-gray-50 py-12">
+            <div className="container mx-auto px-4 max-w-4xl">
                 {/* Header */}
                 <div className="text-center mb-12">
-                    <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <ScissorsIcon className="w-8 h-8 text-accent" />
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <ScissorsIcon className="w-8 h-8 text-blue-600" />
                     </div>
                     <h1 className="text-4xl font-bold mb-4">Custom Tailoring Services</h1>
                     <p className="text-lg text-gray-600">
@@ -63,25 +124,74 @@ export default function TailoringPage() {
 
                 {/* Features */}
                 <div className="grid md:grid-cols-3 gap-6 mb-12">
-                    <div className="card p-6 text-center">
+                    <div className="bg-white p-6 rounded-xl shadow-sm text-center">
                         <div className="text-4xl mb-3">📐</div>
                         <h3 className="font-bold mb-2">Precise Measurements</h3>
                         <p className="text-sm text-gray-600">Upload or provide exact measurements</p>
                     </div>
-                    <div className="card p-6 text-center">
+                    <div className="bg-white p-6 rounded-xl shadow-sm text-center">
                         <div className="text-4xl mb-3">✂️</div>
                         <h3 className="font-bold mb-2">Expert Tailoring</h3>
                         <p className="text-sm text-gray-600">20+ years of tailoring experience</p>
                     </div>
-                    <div className="card p-6 text-center">
+                    <div className="bg-white p-6 rounded-xl shadow-sm text-center">
                         <div className="text-4xl mb-3">🚚</div>
                         <h3 className="font-bold mb-2">Home Delivery</h3>
                         <p className="text-sm text-gray-600">Delivered to your doorstep</p>
                     </div>
                 </div>
 
+                {/* Geolocation Section */}
+                <div className="bg-white rounded-xl shadow-sm p-8 mb-12 border border-blue-100">
+                    <div className="flex flex-col md:flex-row items-center justify-between mb-6">
+                        <div>
+                            <h2 className="text-2xl font-bold mb-2">Find Nearby Partners</h2>
+                            <p className="text-gray-600">Locate our trusted tailoring partners near you.</p>
+                        </div>
+                        <button
+                            onClick={handleGetLocation}
+                            disabled={locationStatus === 'loading'}
+                            className="mt-4 md:mt-0 btn btn-outline flex items-center gap-2"
+                        >
+                            <MapPinIcon className="w-5 h-5" />
+                            {locationStatus === 'loading' ? 'Locating...' : 'Use My Location'}
+                        </button>
+                    </div>
+
+                    {locationStatus === 'success' && nearbyShops.length > 0 && (
+                        <div className="grid md:grid-cols-2 gap-4 animate-fadeIn">
+                            {nearbyShops.map(shop => (
+                                <div key={shop.id} className="border p-4 rounded-lg hover:border-blue-500 cursor-pointer transition-colors bg-blue-50/30">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h3 className="font-bold text-lg">{shop.name}</h3>
+                                            <p className="text-gray-600">{shop.area}</p>
+                                            <div className="flex items-center gap-1 mt-1 text-sm text-yellow-600">
+                                                <span>★</span> {shop.rating}
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="block font-mono text-lg font-bold text-blue-600">
+                                                {shop.distance.toFixed(1)} km
+                                            </span>
+                                            <span className="text-xs text-gray-500">Away</span>
+                                        </div>
+                                    </div>
+                                    <button className="w-full mt-3 text-sm btn btn-primary py-1">View Details</button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {locationStatus === 'idle' && (
+                        <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed">
+                            <p className="text-gray-500">Tap "Use My Location" to see tailored recommendations.</p>
+                        </div>
+                    )}
+                </div>
+
                 {/* Booking Form */}
-                <div className="card p-8">
+                <div className="bg-white rounded-xl shadow-lg p-8">
                     <h2 className="text-2xl font-bold mb-6">Book Tailoring Service</h2>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -93,7 +203,7 @@ export default function TailoringPage() {
                                     type="text"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="input"
+                                    className="input w-full p-2 border rounded"
                                     required
                                 />
                             </div>
@@ -103,7 +213,7 @@ export default function TailoringPage() {
                                     type="tel"
                                     value={formData.mobile}
                                     onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                                    className="input"
+                                    className="input w-full p-2 border rounded"
                                     required
                                 />
                             </div>
@@ -113,7 +223,7 @@ export default function TailoringPage() {
                                     type="email"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="input"
+                                    className="input w-full p-2 border rounded"
                                 />
                             </div>
                             <div>
@@ -121,7 +231,7 @@ export default function TailoringPage() {
                                 <select
                                     value={formData.serviceType}
                                     onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
-                                    className="select"
+                                    className="select w-full p-2 border rounded"
                                     required
                                 >
                                     <option value="">Select Service</option>
@@ -170,7 +280,7 @@ export default function TailoringPage() {
                                 <textarea
                                     value={formData.address}
                                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                    className="textarea"
+                                    className="textarea w-full p-2 border rounded"
                                     rows={3}
                                     required={visitType === 'home'}
                                 />
@@ -191,7 +301,7 @@ export default function TailoringPage() {
                                             ...formData,
                                             measurements: { ...formData.measurements, chest: e.target.value }
                                         })}
-                                        className="input"
+                                        className="input w-full p-2 border rounded"
                                         placeholder="36"
                                     />
                                 </div>
@@ -205,7 +315,7 @@ export default function TailoringPage() {
                                             ...formData,
                                             measurements: { ...formData.measurements, waist: e.target.value }
                                         })}
-                                        className="input"
+                                        className="input w-full p-2 border rounded"
                                         placeholder="32"
                                     />
                                 </div>
@@ -219,13 +329,13 @@ export default function TailoringPage() {
                                             ...formData,
                                             measurements: { ...formData.measurements, shoulder: e.target.value }
                                         })}
-                                        className="input"
+                                        className="input w-full p-2 border rounded"
                                         placeholder="16"
                                     />
                                 </div>
                             </div>
                             <p className="text-sm text-gray-600 mt-3">
-                                <Link href="/size-guide" className="text-accent hover:underline">
+                                <Link href="/size-guide" className="text-blue-600 hover:underline">
                                     View measurement guide
                                 </Link> or leave blank and we'll take measurements during visit
                             </p>
@@ -238,42 +348,18 @@ export default function TailoringPage() {
                                 type="date"
                                 value={formData.preferredDate}
                                 onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
-                                className="input"
+                                className="input w-full p-2 border rounded"
                                 min={new Date().toISOString().split('T')[0]}
                             />
                         </div>
 
-                        {/* Additional Notes */}
-                        <div>
-                            <label className="block text-sm font-semibold mb-2">Additional Notes</label>
-                            <textarea
-                                value={formData.notes}
-                                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                className="textarea"
-                                rows={3}
-                                placeholder="Any specific requirements or preferences..."
-                            />
-                        </div>
-
-                        <button type="submit" className="btn btn-primary w-full">
+                        <button type="submit" className="btn btn-primary w-full py-3 rounded-lg font-bold text-lg">
                             Book Appointment
                         </button>
                     </form>
-                </div>
-
-                {/* Partner Shops */}
-                <div className="mt-12">
-                    <h2 className="text-2xl font-bold mb-6 text-center">Our Partner Tailoring Shops</h2>
-                    <div className="card p-6">
-                        <p className="text-center text-gray-600 mb-4">
-                            Find tailoring services near you across Telugu states
-                        </p>
-                        <div className="aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
-                            <p className="text-gray-500">Google Maps integration (partner locations)</p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     )
 }
+
