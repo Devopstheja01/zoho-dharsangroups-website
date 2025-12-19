@@ -2,10 +2,19 @@ export interface Product {
     id: string;
     name: string;
     price: number;
+    originalPrice?: number;
     category: 'men' | 'women';
     subcategory: string;
     image: string;
+    images?: string[]; // Optional array for gallery
+    description?: string;
+    sizes?: string[];
+    colors?: string[];
     inStock: boolean;
+    rating?: number;
+    reviewCount?: number;
+    customStitchingAvailable?: boolean;
+    stockCount?: number;
 }
 
 export const products: Product[] = [
@@ -14,10 +23,18 @@ export const products: Product[] = [
         id: 'm1',
         name: 'Premium Cotton Formal Shirt',
         price: 2499,
+        originalPrice: 2999,
         category: 'men',
         subcategory: 'Shirts',
         image: '/images/mens-shirt.png',
+        images: ['/images/mens-shirt.png'],
+        description: 'High-quality cotton shirt suitable for formal occasions.',
+        sizes: ['S', 'M', 'L', 'XL'],
+        colors: ['White', 'Blue'],
         inStock: true,
+        rating: 4.5,
+        reviewCount: 12,
+        customStitchingAvailable: true
     },
     {
         id: 'm2',
@@ -27,6 +44,8 @@ export const products: Product[] = [
         subcategory: 'Pants',
         image: '/images/mens-pants.png',
         inStock: true,
+        sizes: ['30', '32', '34', '36'],
+        customStitchingAvailable: true
     },
     {
         id: 'm3',
@@ -36,15 +55,19 @@ export const products: Product[] = [
         subcategory: 'Shirts',
         image: '/images/mens-shirt.png',
         inStock: true,
+        sizes: ['S', 'M', 'L'],
     },
     {
         id: 'm4',
         name: 'Premium Sherwani - Wedding',
         price: 15999,
+        originalPrice: 20000,
         category: 'men',
         subcategory: 'Wedding',
         image: '/images/mens-wedding.png',
         inStock: true,
+        customStitchingAvailable: true,
+        description: 'Exquisite wedding sherwani with intricate embroidery.'
     },
     {
         id: 'm5',
@@ -73,6 +96,7 @@ export const products: Product[] = [
         subcategory: 'Sarees',
         image: '/images/womens-saree.png',
         inStock: true,
+        description: 'Authentic Kanchipuram silk saree with rich border.'
     },
     {
         id: 'w2',
