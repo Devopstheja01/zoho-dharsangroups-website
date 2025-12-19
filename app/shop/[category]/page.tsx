@@ -88,7 +88,7 @@ export default function ShopCategory({ params }: { params: { category: string } 
         <main className={styles.main}>
             <header className={styles.header}>
                 <div className="container">
-                    <h1 className={styles.title}>
+                    <h1 className={styles.title} style={{ color: '#D4AF37' }}>
                         {category === 'men' ? "Men's Collection" : "Women's Collection"}
                     </h1>
                     <p className={styles.subtitle}>
