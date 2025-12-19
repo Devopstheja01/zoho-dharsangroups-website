@@ -9,6 +9,8 @@ import { useState, useMemo } from 'react';
 import { useCart } from '@/lib/CartContext';
 import { useProducts } from '@/lib/productContext';
 
+import { Product } from '@/lib/data';
+
 export default function ShopCategory({ params }: { params: { category: string } }) {
     const category = params.category;
 
@@ -19,7 +21,7 @@ export default function ShopCategory({ params }: { params: { category: string } 
     const { products, isLoading } = useProducts();
     const { addToCart, user, login, addToWishlist, removeFromWishlist, isInWishlist } = useCart();
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [pendingProduct, setPendingProduct] = useState<any>(null);
+    const [pendingProduct, setPendingProduct] = useState<Product | null>(null);
 
     // State for filters and pagination
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -61,7 +63,7 @@ export default function ShopCategory({ params }: { params: { category: string } 
         setCurrentPage(1);
     };
 
-    const handleAddToCart = (product: any) => {
+    const handleAddToCart = (product: Product) => {
         if (!user) {
             setPendingProduct(product);
             setIsAuthModalOpen(true);

@@ -104,7 +104,7 @@ export default function ProductDetailPage() {
                         </div>
                         {product.images && product.images.length > 1 && (
                             <div className="grid grid-cols-4 gap-2">
-                                {product.images.map((img, idx) => (
+                                {product.images.map((img: string, idx: number) => (
                                     <button
                                         key={idx}
                                         onClick={() => setActiveImage(idx)}
