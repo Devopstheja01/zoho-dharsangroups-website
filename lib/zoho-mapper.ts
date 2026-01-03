@@ -9,6 +9,11 @@ import { Product } from './data';
  * You can customize this logic based on how you organize products in Zoho
  */
 function determineCategory(zohoItem: any): 'men' | 'women' {
+    // Strategy 0: Check SKU (Highest Priority)
+    const sku = (zohoItem.sku || '').toUpperCase();
+    if (sku.startsWith('MEN') || sku.includes('-MEN-')) return 'men';
+    if (sku.startsWith('WOM') || sku.includes('-WOM-')) return 'women';
+
     // Strategy 1: Check custom fields
     if (zohoItem.custom_fields) {
         const genderField = zohoItem.custom_fields.find(
