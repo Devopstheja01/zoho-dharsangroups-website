@@ -14,8 +14,11 @@ interface ProductContextType {
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
 export function ProductProvider({ children }: { children: React.ReactNode }) {
-    const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Cache settings - Short duration (1 min) for better sync responsiveness
+    const STORAGE_KEY = 'zoho_products_cache_v3';
+    const CACHE_DURATION = 60 * 1000;
 
     useEffect(() => {
         // Initialize data
@@ -56,7 +59,7 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
 
                         // Cache the data with timestamp
                         if (typeof window !== 'undefined') {
-                            localStorage.setItem('zoho_products_cache_v2', JSON.stringify({
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify({
                                 products: data.products,
                                 timestamp: Date.now(),
                             }));
@@ -73,13 +76,16 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
 
                 // Fallback 1: Try cached Zoho data
                 if (typeof window !== 'undefined') {
-                    const cached = localStorage.getItem('zoho_products_cache_v2');
+                    const cached = localStorage.getItem(STORAGE_KEY);
                     if (cached) {
                         try {
                             const { products: cachedProducts, timestamp } = JSON.parse(cached);
-                            // Relaxed cache age for offline support (24 hours)
-                            if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
-                                console.log('Using cached Zoho data (Offline Mode)');
+                            // Valid if within duration (1 min) OR offline mode fallback (24h)
+                            const isFresh = Date.now() - timestamp < CACHE_DURATION;
+                            const isOfflineBackup = Date.now() - timestamp < 24 * 60 * 60 * 1000;
+
+                            if (isOfflineBackup) {
+                                console.log(isFresh ? 'Using fresh cache' : 'Using offline backup cache');
                                 setProducts(cachedProducts);
                                 setIsLoading(false);
                                 return;
