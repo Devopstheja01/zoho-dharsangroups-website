@@ -1,4 +1,7 @@
-# Dharsan Groups - Enterprise E-commerce Platform
+# DharsanGroups E-commerce Website with Zoho Inventory Integration
+
+> **⚠️ CRITICAL**: Before deploying, you MUST add 5 environment variables to Netlify!
+> See [`NETLIFY_ENV_REQUIRED.md`](./NETLIFY_ENV_REQUIRED.md) for details.
 
 Premium tailoring and fashion e-commerce website built with Next.js 14, TypeScript, and Tailwind CSS.
 
