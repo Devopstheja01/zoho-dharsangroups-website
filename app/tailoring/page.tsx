@@ -322,97 +322,96 @@ export default function TailoringPage() {
                         {/* Address for Home Visit */}
                         {visitType === 'home' && (
                             <div>
-                                <div>
-                                    <div className="flex justify-between items-center mb-2">
-                                        <label className="block text-sm font-semibold">Address *</label>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleGetLocation(true)}
-                                            className="text-xs text-blue-600 flex items-center gap-1 hover:underline"
-                                        >
-                                            <MapPinIcon className="w-3 h-3" /> Use Current Location
-                                        </button>
-                                    </div>
-                                    <textarea
-                                        value={formData.address}
-                                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                        className="textarea w-full p-2 border rounded"
-                                        rows={3}
-                                        required={visitType === 'home'}
-                                    />
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="block text-sm font-semibold">Address *</label>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleGetLocation(true)}
+                                        className="text-xs text-blue-600 flex items-center gap-1 hover:underline"
+                                    >
+                                        <MapPinIcon className="w-3 h-3" /> Use Current Location
+                                    </button>
                                 </div>
+                                <textarea
+                                    value={formData.address}
+                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                    className="textarea w-full p-2 border rounded"
+                                    rows={3}
+                                    required={visitType === 'home'}
+                                />
+                            </div>
                         )}
 
-                                {/* Measurements */}
+                        {/* Measurements */}
+                        <div>
+                            <h3 className="font-semibold mb-3">Measurements (in inches)</h3>
+                            <div className="grid md:grid-cols-3 gap-4">
                                 <div>
-                                    <h3 className="font-semibold mb-3">Measurements (in inches)</h3>
-                                    <div className="grid md:grid-cols-3 gap-4">
-                                        <div>
-                                            <label className="block text-sm mb-2">Chest</label>
-                                            <input
-                                                type="number"
-                                                step="0.5"
-                                                value={formData.measurements.chest}
-                                                onChange={(e) => setFormData({
-                                                    ...formData,
-                                                    measurements: { ...formData.measurements, chest: e.target.value }
-                                                })}
-                                                className="input w-full p-2 border rounded"
-                                                placeholder="36"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm mb-2">Waist</label>
-                                            <input
-                                                type="number"
-                                                step="0.5"
-                                                value={formData.measurements.waist}
-                                                onChange={(e) => setFormData({
-                                                    ...formData,
-                                                    measurements: { ...formData.measurements, waist: e.target.value }
-                                                })}
-                                                className="input w-full p-2 border rounded"
-                                                placeholder="32"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm mb-2">Shoulder</label>
-                                            <input
-                                                type="number"
-                                                step="0.5"
-                                                value={formData.measurements.shoulder}
-                                                onChange={(e) => setFormData({
-                                                    ...formData,
-                                                    measurements: { ...formData.measurements, shoulder: e.target.value }
-                                                })}
-                                                className="input w-full p-2 border rounded"
-                                                placeholder="16"
-                                            />
-                                        </div>
-                                    </div>
-                                    <p className="text-sm text-gray-600 mt-3">
-                                        <Link href="/size-guide" className="text-blue-600 hover:underline">
-                                            View measurement guide
-                                        </Link> or leave blank and we'll take measurements during visit
-                                    </p>
-                                </div>
-
-                                {/* Preferred Date */}
-                                <div>
-                                    <label className="block text-sm font-semibold mb-2">Preferred Date</label>
+                                    <label className="block text-sm mb-2">Chest</label>
                                     <input
-                                        type="date"
-                                        value={formData.preferredDate}
-                                        onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
+                                        type="number"
+                                        step="0.5"
+                                        value={formData.measurements.chest}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            measurements: { ...formData.measurements, chest: e.target.value }
+                                        })}
                                         className="input w-full p-2 border rounded"
-                                        min={new Date().toISOString().split('T')[0]}
+                                        placeholder="36"
                                     />
                                 </div>
+                                <div>
+                                    <label className="block text-sm mb-2">Waist</label>
+                                    <input
+                                        type="number"
+                                        step="0.5"
+                                        value={formData.measurements.waist}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            measurements: { ...formData.measurements, waist: e.target.value }
+                                        })}
+                                        className="input w-full p-2 border rounded"
+                                        placeholder="32"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm mb-2">Shoulder</label>
+                                    <input
+                                        type="number"
+                                        step="0.5"
+                                        value={formData.measurements.shoulder}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            measurements: { ...formData.measurements, shoulder: e.target.value }
+                                        })}
+                                        className="input w-full p-2 border rounded"
+                                        placeholder="16"
+                                    />
+                                </div>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-3">
+                                <Link href="/size-guide" className="text-blue-600 hover:underline">
+                                    View measurement guide
+                                </Link> or leave blank and we'll take measurements during visit
+                            </p>
+                        </div>
 
-                                <button type="submit" className="btn btn-primary w-full py-3 rounded-lg font-bold text-lg">
-                                    Book Appointment
-                                </button>
-                            </form>
+                        {/* Preferred Date */}
+                        <div>
+                            <label className="block text-sm font-semibold mb-2">Preferred Date</label>
+                            <input
+                                type="date"
+                                value={formData.preferredDate}
+                                onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
+                                className="input w-full p-2 border rounded"
+                                min={new Date().toISOString().split('T')[0]}
+                            />
+                        </div>
+
+                        <button type="submit" className="btn btn-primary w-full py-3 rounded-lg font-bold text-lg">
+                            Book Appointment
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
