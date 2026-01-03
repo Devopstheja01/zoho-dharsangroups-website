@@ -56,7 +56,7 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
 
                         // Cache the data with timestamp
                         if (typeof window !== 'undefined') {
-                            localStorage.setItem('zoho_products_cache', JSON.stringify({
+                            localStorage.setItem('zoho_products_cache_v2', JSON.stringify({
                                 products: data.products,
                                 timestamp: Date.now(),
                             }));
@@ -73,7 +73,7 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
 
                 // Fallback 1: Try cached Zoho data
                 if (typeof window !== 'undefined') {
-                    const cached = localStorage.getItem('zoho_products_cache');
+                    const cached = localStorage.getItem('zoho_products_cache_v2');
                     if (cached) {
                         try {
                             const { products: cachedProducts, timestamp } = JSON.parse(cached);
