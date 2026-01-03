@@ -44,13 +44,107 @@ export default function CheckoutPage() {
     const shippingCharge = total > 2000 ? 0 : 100
     const finalTotal = total + shippingCharge
 
-    const handlePlaceOrder = () => {
-        setOrderPlaced(true)
-        setTimeout(() => {
-            clearCart()
-            router.push('/')
-        }, 3000)
-    }
+    const handlePlaceOrder = async () => {
+        if (paymentMethod === 'cod') {
+            // Simple COD flow
+            try {
+                // Create order in Zoho directly as confirmed (or draft)
+                await createZohoOrder('cod');
+                setOrderPlaced(true);
+                setTimeout(() => {
+                    clearCart();
+                    router.push('/');
+                }, 3000);
+            } catch (err) {
+                alert('Failed to place order. Please try again.');
+            }
+            return;
+        }
+
+        if (paymentMethod === 'card' || paymentMethod === 'upi') {
+            // Razorpay Flow
+            try {
+                // 1. Initialize Order
+                const res = await fetch('/.netlify/functions/razorpay-init', {
+                    method: 'POST',
+                    body: JSON.stringify({ amount: finalTotal }),
+                });
+                const orderData = await res.json();
+
+                if (!res.ok) throw new Error(orderData.error);
+
+                // 2. Open options
+                const options = {
+                    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_YOUR_KEY_HERE', // Fallback for dev
+                    amount: orderData.amount,
+                    currency: orderData.currency,
+                    name: "Dharsan Groups",
+                    description: "Premium Tailoring Purchase",
+                    order_id: orderData.id,
+                    handler: async function (response: any) {
+                        // 3. Verify Payment
+                        const verifyRes = await fetch('/.netlify/functions/razorpay-verify', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature
+                            })
+                        });
+
+                        const verifyData = await verifyRes.json();
+
+                        if (verifyData.verified) {
+                            // 4. Create Zoho Order (Paid)
+                            await createZohoOrder('prepaid', response.razorpay_payment_id);
+                            setOrderPlaced(true);
+                            clearCart();
+                        } else {
+                            alert('Payment verification failed!');
+                        }
+                    },
+                    prefill: {
+                        name: shippingInfo.name,
+                        email: shippingInfo.email,
+                        contact: shippingInfo.mobile
+                    },
+                    theme: {
+                        color: "#CFA266" // Accent color
+                    }
+                };
+
+                const rzp = new (window as any).Razorpay(options);
+                rzp.open();
+
+            } catch (err) {
+                console.error(err);
+                alert('Payment initialization failed. Check console.');
+            }
+        }
+    };
+
+    const createZohoOrder = async (type: 'cod' | 'prepaid', txnId?: string) => {
+        // Map cart to Zoho line items
+        const line_items = cart.map(item => ({
+            item_id: item.id.startsWith('ZC') ? item.id : undefined, // Only pass valid Zoho IDs
+            name: item.name,
+            rate: item.price,
+            quantity: item.quantity,
+            // Fallback for mock items if mixed (shouldn't happen in Prod mode)
+            description: `Size: ${item.size}`
+        }));
+
+        await fetch('/.netlify/functions/zoho-create-order', {
+            method: 'POST',
+            body: JSON.stringify({
+                customer_name: shippingInfo.name,
+                email: shippingInfo.email,
+                line_items,
+                payment_terms: type === 'cod' ? 'Due on Receipt' : 'Immediate Payment',
+                notes: `Order via Website. Type: ${type}. Txn: ${txnId || 'N/A'}`
+            })
+        });
+    };
 
     // Show loading state during SSR
     if (!mounted) {

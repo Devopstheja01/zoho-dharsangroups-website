@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, products as initialStaticProducts } from './data';
-import { generateMockProducts } from './mockDataGenerator';
+
 
 interface ProductContextType {
     products: Product[];
@@ -69,7 +69,7 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
                 throw new Error('Failed to fetch from Zoho API');
 
             } catch (error) {
-                console.warn('Zoho API unavailable, falling back to cached/mock data:', error);
+                console.warn('Zoho API unavailable:', error);
 
                 // Fallback 1: Try cached Zoho data
                 if (typeof window !== 'undefined') {
@@ -77,11 +77,9 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
                     if (cached) {
                         try {
                             const { products: cachedProducts, timestamp } = JSON.parse(cached);
-                            const age = Date.now() - timestamp;
-
-                            // Use cache if less than 1 hour old
-                            if (age < 60 * 60 * 1000) {
-                                console.log('Using cached Zoho data');
+                            // Relaxed cache age for offline support (24 hours)
+                            if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
+                                console.log('Using cached Zoho data (Offline Mode)');
                                 setProducts(cachedProducts);
                                 setIsLoading(false);
                                 return;
@@ -92,58 +90,10 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
                     }
                 }
 
-                // Fallback 2: Use mock data (original behavior)
-                console.log('Using mock data as final fallback');
-                const mockData = generateMockProducts();
-                const allBaseProducts = [...initialStaticProducts, ...mockData];
-
-                // Get LocalStorage Data
-                let localProducts: Product[] = [];
-                if (typeof window !== 'undefined') {
-                    const saved = localStorage.getItem('admin_products');
-                    if (saved) {
-                        try {
-                            localProducts = JSON.parse(saved);
-                        } catch (e) {
-                            console.error('Failed to parse admin products', e);
-                        }
-                    }
-                }
-
-                const localIds = new Set(localProducts.map(p => p.id));
-                const filteredBase = allBaseProducts.filter(p => !localIds.has(p.id));
-
-                let merged = [...localProducts, ...filteredBase];
-
-                // Backfill Missing SKUs
-                let hasUpdates = false;
-                const generateSKU = (p: Product) => {
-                    const cat = (p.category || 'GEN').substring(0, 1).toUpperCase();
-                    const sub = (p.subcategory || 'GEN').substring(0, 3).toUpperCase();
-                    const nam = p.name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase();
-                    const rnd = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-                    return `${cat}-${sub}-${nam}-${rnd}`;
-                };
-
-                merged = merged.map(p => {
-                    if (!p.sku) {
-                        hasUpdates = true;
-                        return { ...p, sku: generateSKU(p) };
-                    }
-                    return p;
-                });
-
-                if (hasUpdates && typeof window !== 'undefined') {
-                    try {
-                        const newAdminProducts = merged.filter(p => hasUpdates && !localIds.has(p.id) && allBaseProducts.find(bp => bp.id === p.id));
-                        const finalAdminList = [...localProducts, ...newAdminProducts];
-                        localStorage.setItem('admin_products', JSON.stringify(finalAdminList));
-                    } catch (e) {
-                        console.error(e);
-                    }
-                }
-
-                setProducts(merged);
+                // Final State: No Products (Strict Mode)
+                console.error('No valid Zoho data found. Website will show empty catalog.');
+                setProducts([]);
+            } finally {
                 setIsLoading(false);
             }
         };

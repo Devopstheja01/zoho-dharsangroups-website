@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ShoppingCartIcon, UserIcon, HeartIcon } from '@heroicons/react/24/outline'
+import InView from '@/components/InView'
 
 export default function HomePage() {
     return (
@@ -9,50 +10,60 @@ export default function HomePage() {
             <section className="relative bg-gradient-to-br from-primary via-primary-light to-primary min-h-[600px] flex items-center">
                 <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-5"></div>
                 <div className="container-custom relative z-10 py-20">
-                    <div className="max-w-3xl">
-                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-                            Premium Tailoring &
-                            <span className="text-accent block">Fashion Excellence</span>
-                        </h1>
-                        <p className="text-xl md:text-2xl text-gray-200 mb-8">
-                            Discover luxury clothing and custom stitching services in Tirupati.
-                            From traditional sarees to modern formals.
-                        </p>
-                        <div className="flex flex-wrap gap-4">
-                            <Link href="/shop/men" className="btn btn-primary text-lg">
-                                Shop Men's Collection
-                            </Link>
-                            <Link href="/shop/women" className="btn bg-white text-primary hover:bg-gray-100 text-lg">
-                                Shop Women's Collection
-                            </Link>
+                    <InView>
+                        <div className="max-w-3xl">
+                            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+                                Premium Tailoring &
+                                <span className="text-accent block">Fashion Excellence</span>
+                            </h1>
+                            <p className="text-xl md:text-2xl text-gray-200 mb-8">
+                                Discover luxury clothing and custom stitching services in Tirupati.
+                                From traditional sarees to modern formals.
+                            </p>
+                            <div className="flex flex-wrap gap-4">
+                                <Link href="/shop/men" className="btn btn-primary text-lg">
+                                    Shop Men's Collection
+                                </Link>
+                                <Link href="/shop/women" className="btn bg-white text-primary hover:bg-gray-100 text-lg">
+                                    Shop Women's Collection
+                                </Link>
+                            </div>
                         </div>
-                    </div>
+                    </InView>
                 </div>
             </section>
 
             {/* Categories Section */}
             <section className="py-20 bg-surface">
                 <div className="container-custom">
-                    <h2 className="text-4xl font-bold text-center mb-12">Shop By Category</h2>
+                    <InView delay={100}>
+                        <h2 className="text-4xl font-bold text-center mb-12">Shop By Category</h2>
+                    </InView>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <CategoryCard
-                            title="Men's Collection"
-                            description="Premium shirts, pants, formals & wedding suits"
-                            image="/categories/men.jpg"
-                            href="/shop/men"
-                        />
-                        <CategoryCard
-                            title="Women's Collection"
-                            description="Elegant sarees, dresses & ethnic wear"
-                            image="/categories/women.jpg"
-                            href="/shop/women"
-                        />
-                        <CategoryCard
-                            title="Custom Tailoring"
-                            description="Perfect fit with custom measurements"
-                            image="/categories/tailoring.jpg"
-                            href="/tailoring"
-                        />
+                        <InView delay={200}>
+                            <CategoryCard
+                                title="Men's Collection"
+                                description="Premium shirts, pants, formals & wedding suits"
+                                image="/categories/men.jpg"
+                                href="/shop/men"
+                            />
+                        </InView>
+                        <InView delay={300}>
+                            <CategoryCard
+                                title="Women's Collection"
+                                description="Elegant sarees, dresses & ethnic wear"
+                                image="/categories/women.jpg"
+                                href="/shop/women"
+                            />
+                        </InView>
+                        <InView delay={400}>
+                            <CategoryCard
+                                title="Custom Tailoring"
+                                description="Perfect fit with custom measurements"
+                                image="/categories/tailoring.jpg"
+                                href="/tailoring"
+                            />
+                        </InView>
                     </div>
                 </div>
             </section>

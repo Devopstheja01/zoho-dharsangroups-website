@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { useToast } from './ToastContext'
 
 export interface CartItem {
     id: string
@@ -41,6 +42,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const [cart, setCart] = useState<CartItem[]>([])
     const [wishlist, setWishlist] = useState<CartItem[]>([])
     const [user, setUser] = useState<User | null>(null)
+    const { showToast } = useToast()
 
     // Load cart, wishlist and user from localStorage on mount
     useEffect(() => {
@@ -87,6 +89,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             )
 
             if (existingItem) {
+                showToast(`Updated quantity for ${item.name}`, 'success')
                 return prevCart.map((cartItem: CartItem) =>
                     cartItem.id === item.id && cartItem.size === item.size
                         ? { ...cartItem, quantity: cartItem.quantity + 1 }
@@ -94,6 +97,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 )
             }
 
+            showToast(`Added ${item.name} to cart`, 'success')
             return [...prevCart, { ...item, quantity: 1 }]
         })
     }

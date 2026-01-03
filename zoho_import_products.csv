@@ -1,0 +1,13 @@
+Item Name,SKU,Selling Price,Purchase Price,Description,Opening Stock,Opening Stock Value,Item Type,Unit
+"Premium Cotton Formal Shirt",MEN-SHI-PRE-001,2499,2000,"High-quality cotton shirt suitable for formal occasions.",15,30000,Goods,pcs
+"Tailored Formal Trousers",MEN-PAN-TAI-002,1999,1500,"",20,30000,Goods,pcs
+"Classic White Cotton Shirt",MEN-SHI-CLA-003,1899,1500,"",10,15000,Goods,pcs
+"Premium Sherwani - Wedding",MEN-WED-SHE-004,15999,12000,"Exquisite wedding sherwani with intricate embroidery.",5,60000,Goods,pcs
+"Traditional Cotton Kurta",MEN-ETH-TRA-005,1499,1200,"",12,14400,Goods,pcs
+"Office Formal Trousers",MEN-PAN-OFF-006,2199,1800,"",18,32400,Goods,pcs
+"Kanchipuram Silk Saree",WOM-SAR-KAN-001,12999,10000,"Authentic Kanchipuram silk saree with rich border.",8,80000,Goods,pcs
+"Designer Anarkali Suit",WOM-DRE-DES-002,5999,4500,"",10,45000,Goods,pcs
+"Cotton Printed Saree",WOM-SAR-COT-003,2999,2200,"",15,33000,Goods,pcs
+"Elegant Party Dress",WOM-DRE-ELE-004,3499,2800,"",10,28000,Goods,pcs
+"Traditional Pattu Saree",WOM-SAR-PAT-005,8999,7000,"",6,42000,Goods,pcs
+"Indo-Western Fusion Dress",WOM-DRE-FUS-006,4499,3500,"",10,35000,Goods,pcs
