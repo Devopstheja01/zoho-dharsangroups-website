@@ -18,54 +18,44 @@ interface ZohoConfig {
     apiDomain: string;
 }
 
-// In-memory token cache (for serverless functions)
-let cachedAccessToken: string | null = null;
-let tokenExpiryTime: number = 0;
+// In-memory token cache (keyed by domain)
+const tokenCache: Record<string, { token: string; expiry: number }> = {};
 
 /**
- * Get Zoho configuration from environment variables
+ * Get Zoho configuration
  */
-export function getZohoConfig(): ZohoConfig {
-    const config = {
+export function getZohoConfig() {
+    return {
         organizationId: process.env.ZOHO_ORGANIZATION_ID || '',
         clientId: process.env.ZOHO_CLIENT_ID || '',
         clientSecret: process.env.ZOHO_CLIENT_SECRET || '',
         refreshToken: process.env.ZOHO_REFRESH_TOKEN || '',
+        // Default to .com, but allow override
         apiDomain: process.env.ZOHO_API_DOMAIN || 'https://www.zohoapis.com',
     };
-
-    // Validate required fields
-    const missing = Object.entries(config)
-        .filter(([_, value]) => !value)
-        .map(([key]) => key);
-
-    if (missing.length > 0) {
-        throw new Error(`Missing Zoho configuration: ${missing.join(', ')}`);
-    }
-
-    return config;
 }
 
 /**
- * Get access token (refresh if needed)
+ * Get access token for a specific domain
  */
-export async function getAccessToken(): Promise<string> {
+async function getAccessTokenForDomain(domain: string): Promise<string> {
     const now = Date.now();
+    const cache = tokenCache[domain];
 
-    // Return cached token if still valid (with 5 min buffer)
-    if (cachedAccessToken && tokenExpiryTime > now + 5 * 60 * 1000) {
-        return cachedAccessToken;
+    // Return cached token if valid
+    if (cache && cache.expiry > now + 300000) {
+        return cache.token;
     }
 
-    // Refresh token
     const config = getZohoConfig();
 
-    // Determine accounts domain based on API domain
-    const accountsDomain = config.apiDomain.includes('.in')
-        ? 'https://accounts.zoho.in'
-        : config.apiDomain.includes('.eu')
-            ? 'https://accounts.zoho.eu'
-            : 'https://accounts.zoho.com';
+    // Convert API domain to Accounts domain
+    // .com -> accounts.zoho.com
+    // .in -> accounts.zoho.in
+    const tld = domain.split('.').pop(); // 'com' or 'in' etc
+    const accountsDomain = `https://accounts.zoho.${tld}`;
+
+    console.log(`Refreshing token for DC: ${domain} (Auth: ${accountsDomain})`);
 
     const params = new URLSearchParams({
         refresh_token: config.refreshToken,
@@ -76,52 +66,86 @@ export async function getAccessToken(): Promise<string> {
 
     const response = await fetch(`${accountsDomain}/oauth/v2/token?${params.toString()}`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
 
     if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Failed to refresh Zoho token: ${error}`);
+        throw new Error(`Auth failed for ${domain}: ${await response.text()}`);
     }
 
     const data: ZohoTokenResponse = await response.json();
 
-    cachedAccessToken = data.access_token;
-    tokenExpiryTime = now + data.expires_in * 1000;
+    if (data.access_token) {
+        tokenCache[domain] = {
+            token: data.access_token,
+            expiry: now + (data.expires_in * 1000)
+        };
+        return data.access_token;
+    }
 
-    return cachedAccessToken;
+    throw new Error(`No access token returned for ${domain}`);
 }
 
 /**
- * Make authenticated API request to Zoho Inventory
+ * Make authenticated API request with Auto-DC-Switching
  */
-export async function zohoRequest<T = any>(
-    endpoint: string,
-    options: RequestInit = {}
-): Promise<T> {
+export async function zohoRequest<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const config = getZohoConfig();
-    const accessToken = await getAccessToken();
 
-    const url = `${config.apiDomain}/inventory/v1${endpoint}${endpoint.includes('?') ? '&' : '?'
-        }organization_id=${config.organizationId}`;
+    // Strategy: Try Configured Domain -> If Code 57 -> Try Alternative
+    let currentDomain = config.apiDomain;
+    let attempts = 0;
+    const maxAttempts = 2; // Try primary, then secondary
 
-    const response = await fetch(url, {
-        ...options,
-        headers: {
-            'Authorization': `Zoho-oauthtoken ${accessToken}`,
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
+    while (attempts < maxAttempts) {
+        try {
+            attempts++;
+            const accessToken = await getAccessTokenForDomain(currentDomain);
 
-    if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Zoho API error (${response.status}): ${error}`);
+            const url = `${currentDomain}/inventory/v1${endpoint}${endpoint.includes('?') ? '&' : '?'}organization_id=${config.organizationId}`;
+
+            const response = await fetch(url, {
+                ...options,
+                headers: {
+                    'Authorization': `Zoho-oauthtoken ${accessToken}`,
+                    'Content-Type': 'application/json',
+                    ...options.headers,
+                },
+            });
+
+            const data = await response.json();
+
+            // CHECK FOR CODE 57 (Org Mismatch / DC Mismatch)
+            if (data.code === 57) {
+                console.warn(`Org ID mismatch on ${currentDomain} (Code 57).`);
+
+                // If we haven't tried the alternative yet, switch and retry
+                if (attempts < maxAttempts) {
+                    const altDomain = currentDomain.includes('.com')
+                        ? 'https://www.zohoapis.in'
+                        : 'https://www.zohoapis.com';
+
+                    console.log(`Swapping DC: ${currentDomain} -> ${altDomain} and retrying...`);
+                    currentDomain = altDomain;
+                    continue; // Retry loop with new domain
+                }
+            }
+
+            // Other errors or Success
+            if (data.code && data.code !== 0) {
+                throw new Error(`Zoho API Error (${data.code}): ${data.message}`);
+            }
+
+            return data;
+
+        } catch (error: any) {
+            // If it's the last attempt, throw
+            if (attempts >= maxAttempts) throw error;
+            console.error(`Attempt ${attempts} failed:`, error);
+        }
     }
 
-    return response.json();
+    throw new Error('All Data Center attempts failed');
 }
 
 /**
