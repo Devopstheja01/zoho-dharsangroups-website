@@ -83,7 +83,7 @@ async function getAccessTokenForDomain(domain: string): Promise<string> {
         return data.access_token;
     }
 
-    throw new Error(`No access token returned for ${domain}`);
+    throw new Error(`No access token returned for ${domain}. Response: ${JSON.stringify(data)}`);
 }
 
 /**
