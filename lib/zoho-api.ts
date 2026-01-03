@@ -31,7 +31,7 @@ export function getZohoConfig(): ZohoConfig {
         clientId: process.env.ZOHO_CLIENT_ID || '',
         clientSecret: process.env.ZOHO_CLIENT_SECRET || '',
         refreshToken: process.env.ZOHO_REFRESH_TOKEN || '',
-        apiDomain: process.env.ZOHO_API_DOMAIN || 'https://www.zohoapis.in',
+        apiDomain: process.env.ZOHO_API_DOMAIN || 'https://www.zohoapis.com',
     };
 
     // Validate required fields
