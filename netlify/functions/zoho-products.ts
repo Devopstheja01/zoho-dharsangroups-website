@@ -57,8 +57,8 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
             headers,
             body: JSON.stringify({
                 success: true,
-                count: activeProducts.length,
-                products: activeProducts,
+                count: products.length,
+                products: products,
                 synced_at: new Date().toISOString(),
             }),
         };
