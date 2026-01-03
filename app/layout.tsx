@@ -26,17 +26,17 @@ export default function RootLayout({
                     src="https://checkout.razorpay.com/v1/checkout.js"
                     strategy="lazyOnload"
                 />
-                <ProductProvider>
-                    <CartProvider>
-                        <ToastProvider>
+                <ToastProvider>
+                    <ProductProvider>
+                        <CartProvider>
                             <Navbar />
                             <main className="min-h-screen">
                                 {children}
                             </main>
                             <Footer />
-                        </ToastProvider>
-                    </CartProvider>
-                </ProductProvider>
+                        </CartProvider>
+                    </ProductProvider>
+                </ToastProvider>
             </body>
         </html>
     )
