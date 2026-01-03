@@ -56,7 +56,7 @@ export default function TailoringPage() {
         return deg * (Math.PI / 180)
     }
 
-    const handleGetLocation = (forAddress = false) => {
+    const handleGetLocation = async (forAddress = false) => {
         setLocationStatus('loading');
         if (!navigator.geolocation) {
             alert('Geolocation is not supported by your browser');
@@ -64,42 +64,61 @@ export default function TailoringPage() {
             return;
         }
 
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                const { latitude, longitude } = position.coords;
-                setUserLocation({ lat: latitude, lng: longitude });
+        const getPos = (options: PositionOptions): Promise<GeolocationPosition> => {
+            return new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, options));
+        };
 
-                // 1. Sort shops by distance
-                const sortedShops = PARTNER_SHOPS.map(shop => ({
-                    ...shop,
-                    distance: calculateDistance(latitude, longitude, shop.lat, shop.lng)
-                })).sort((a, b) => a.distance - b.distance);
+        try {
+            let position: GeolocationPosition | null = null;
 
-                setNearbyShops(sortedShops);
-                setLocationStatus('success');
+            // Attempt 1: High Accuracy (GPS) - 5s timeout
+            try {
+                position = await getPos({ enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+            } catch (e) {
+                console.warn('High accuracy location failed, trying low accuracy...');
+            }
 
-                // 2. Auto-fill address if requested or if address is empty
-                if (forAddress || (visitType === 'home' && !formData.address)) {
-                    try {
-                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-                        const data = await response.json();
-                        if (data && data.display_name) {
-                            setFormData(prev => ({ ...prev, address: data.display_name }));
-                        }
-                    } catch (error) {
-                        console.error('Failed to reverse geocode:', error);
+            // Attempt 2: Low Accuracy (WiFi/IP) - 10s timeout
+            if (!position) {
+                position = await getPos({ enableHighAccuracy: false, timeout: 10000, maximumAge: 0 });
+            }
+
+            const { latitude, longitude } = position.coords;
+            setUserLocation({ lat: latitude, lng: longitude });
+
+            // 1. Sort shops
+            const sortedShops = PARTNER_SHOPS.map(shop => ({
+                ...shop,
+                distance: calculateDistance(latitude, longitude, shop.lat, shop.lng)
+            })).sort((a, b) => a.distance - b.distance);
+
+            setNearbyShops(sortedShops);
+            setLocationStatus('success');
+
+            // 2. Auto-fill address
+            if (forAddress || (visitType === 'home' && !formData.address)) {
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                    const data = await response.json();
+                    if (data && data.display_name) {
+                        setFormData(prev => ({ ...prev, address: data.display_name }));
                     }
+                } catch (error) {
+                    console.error('Failed to reverse geocode:', error);
                 }
-            },
-            (error) => {
-                console.error(error);
-                let msg = 'Unable to retrieve your location';
-                if (error.code === 1) msg = 'Location permission denied. Please enable it in browser settings.';
-                alert(msg);
-                setLocationStatus('error');
-            },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
+            }
+
+        } catch (error: any) {
+            console.error('Geolocation error:', error);
+            let msg = 'Unable to retrieve your location.';
+
+            if (error.code === 1) msg = 'Location permission denied. Please allow location access.';
+            else if (error.code === 2) msg = 'Location unavailable. Please check your device GPS/Network.';
+            else if (error.code === 3) msg = 'Location request timed out. Please try again.';
+
+            alert(msg);
+            setLocationStatus('error');
+        }
     };
 
     const handleSimulateLocation = () => {
