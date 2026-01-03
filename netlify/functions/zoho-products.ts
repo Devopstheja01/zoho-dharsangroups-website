@@ -42,13 +42,15 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
 
         console.log(`Fetched ${zohoItems.length} items from Zoho`);
 
+        // Filter out inactive items (deleted/hidden in Zoho)
+        const activeZohoItems = zohoItems.filter((item: any) => item.status === 'active');
+
+        console.log(`Filtered to ${activeZohoItems.length} active items`);
+
         // Map to our Product interface
-        const products = mapZohoItemsToProducts(zohoItems);
+        const products = mapZohoItemsToProducts(activeZohoItems);
 
-        // Filter out inactive items
-        const activeProducts = products.filter(p => p.inStock || p.stockQuantity !== undefined);
-
-        console.log(`Returning ${activeProducts.length} active products`);
+        console.log(`Returning ${products.length} active products`);
 
         return {
             statusCode: 200,
