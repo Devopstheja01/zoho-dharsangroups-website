@@ -18,7 +18,8 @@
         "react-hook-form": "^7.50.0",
         "zod": "^3.22.0",
         "@heroicons/react": "^2.1.0",
-        "lucide-react": "^0.309.0"
+        "lucide-react": "^0.309.0",
+        "@netlify/functions": "^2.4.1"
     },
     "devDependencies": {
         "@types/node": "^20",

@@ -19,67 +19,133 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         // Initialize data
-        const loadData = () => {
-            // 1. Get Static + Mock Data
-            const mockData = generateMockProducts();
-            const allBaseProducts = [...initialStaticProducts, ...mockData];
+        const loadData = async () => {
+            try {
+                // 1. Try to fetch from Zoho Inventory via Netlify Function
+                console.log('Fetching products from Zoho Inventory...');
 
-            // 2. Get LocalStorage Data (Admin added products + Overrides)
-            let localProducts: Product[] = [];
-            if (typeof window !== 'undefined') {
-                const saved = localStorage.getItem('admin_products');
-                if (saved) {
-                    try {
-                        localProducts = JSON.parse(saved);
-                    } catch (e) {
-                        console.error('Failed to parse admin products', e);
+                const response = await fetch('/.netlify/functions/zoho-products');
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.success && data.products) {
+                        console.log(`Loaded ${data.products.length} products from Zoho`);
+
+                        // 2. Get LocalStorage Data (Admin added products + Overrides)
+                        let localProducts: Product[] = [];
+                        if (typeof window !== 'undefined') {
+                            const saved = localStorage.getItem('admin_products');
+                            if (saved) {
+                                try {
+                                    localProducts = JSON.parse(saved);
+                                } catch (e) {
+                                    console.error('Failed to parse admin products', e);
+                                }
+                            }
+                        }
+
+                        // 3. Merge: Zoho products + local overrides
+                        const localIds = new Set(localProducts.map(p => p.id));
+                        const filteredZoho = data.products.filter((p: Product) => !localIds.has(p.id));
+
+                        const merged = [...localProducts, ...filteredZoho];
+
+                        setProducts(merged);
+                        setIsLoading(false);
+
+                        // Cache the data with timestamp
+                        if (typeof window !== 'undefined') {
+                            localStorage.setItem('zoho_products_cache', JSON.stringify({
+                                products: data.products,
+                                timestamp: Date.now(),
+                            }));
+                        }
+
+                        return;
                     }
                 }
-            }
 
-            // 3. Merge: Filter out base products that have been overridden by localProducts
-            // This prevents duplicate keys and ensures the "edited" version is the one shown
-            const localIds = new Set(localProducts.map(p => p.id));
-            const filteredBase = allBaseProducts.filter(p => !localIds.has(p.id));
+                throw new Error('Failed to fetch from Zoho API');
 
-            let merged = [...localProducts, ...filteredBase];
+            } catch (error) {
+                console.warn('Zoho API unavailable, falling back to cached/mock data:', error);
 
-            // 4. Backfill Missing SKUs
-            let hasUpdates = false;
-            const generateSKU = (p: Product) => {
-                const cat = (p.category || 'GEN').substring(0, 1).toUpperCase();
-                const sub = (p.subcategory || 'GEN').substring(0, 3).toUpperCase();
-                const nam = p.name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase();
-                const rnd = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-                return `${cat}-${sub}-${nam}-${rnd}`;
-            };
+                // Fallback 1: Try cached Zoho data
+                if (typeof window !== 'undefined') {
+                    const cached = localStorage.getItem('zoho_products_cache');
+                    if (cached) {
+                        try {
+                            const { products: cachedProducts, timestamp } = JSON.parse(cached);
+                            const age = Date.now() - timestamp;
 
-            merged = merged.map(p => {
-                if (!p.sku) {
-                    hasUpdates = true;
-                    return { ...p, sku: generateSKU(p) };
+                            // Use cache if less than 1 hour old
+                            if (age < 60 * 60 * 1000) {
+                                console.log('Using cached Zoho data');
+                                setProducts(cachedProducts);
+                                setIsLoading(false);
+                                return;
+                            }
+                        } catch (e) {
+                            console.error('Failed to parse cached data', e);
+                        }
+                    }
                 }
-                return p;
-            });
 
-            if (hasUpdates && typeof window !== 'undefined') {
-                // We only persist the "admin" products (localProducts) + any base products that we modified
-                // Ideally we should just modify the session data, but to persist across reloads we need to save to localStorage
-                // For simplicity, we'll just save the ones that were missing SKUs into localStorage if they aren't there
-                const updatesToSave = merged.filter(p => localIds.has(p.id) || !p.sku); // Actually just save all is safer for prototype
-                // Let's just save the overrides like updateProduct
-                try {
-                    // Find products that got a new SKU and weren't in admin_products before
-                    const newAdminProducts = merged.filter(p => hasUpdates && !localIds.has(p.id) && allBaseProducts.find(bp => bp.id === p.id));
-                    const finalAdminList = [...localProducts, ...newAdminProducts];
-                    localStorage.setItem('admin_products', JSON.stringify(finalAdminList));
-                } catch (e) {
-                    console.error(e);
+                // Fallback 2: Use mock data (original behavior)
+                console.log('Using mock data as final fallback');
+                const mockData = generateMockProducts();
+                const allBaseProducts = [...initialStaticProducts, ...mockData];
+
+                // Get LocalStorage Data
+                let localProducts: Product[] = [];
+                if (typeof window !== 'undefined') {
+                    const saved = localStorage.getItem('admin_products');
+                    if (saved) {
+                        try {
+                            localProducts = JSON.parse(saved);
+                        } catch (e) {
+                            console.error('Failed to parse admin products', e);
+                        }
+                    }
                 }
-            }
 
-            setProducts(merged);
-            setIsLoading(false);
+                const localIds = new Set(localProducts.map(p => p.id));
+                const filteredBase = allBaseProducts.filter(p => !localIds.has(p.id));
+
+                let merged = [...localProducts, ...filteredBase];
+
+                // Backfill Missing SKUs
+                let hasUpdates = false;
+                const generateSKU = (p: Product) => {
+                    const cat = (p.category || 'GEN').substring(0, 1).toUpperCase();
+                    const sub = (p.subcategory || 'GEN').substring(0, 3).toUpperCase();
+                    const nam = p.name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase();
+                    const rnd = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+                    return `${cat}-${sub}-${nam}-${rnd}`;
+                };
+
+                merged = merged.map(p => {
+                    if (!p.sku) {
+                        hasUpdates = true;
+                        return { ...p, sku: generateSKU(p) };
+                    }
+                    return p;
+                });
+
+                if (hasUpdates && typeof window !== 'undefined') {
+                    try {
+                        const newAdminProducts = merged.filter(p => hasUpdates && !localIds.has(p.id) && allBaseProducts.find(bp => bp.id === p.id));
+                        const finalAdminList = [...localProducts, ...newAdminProducts];
+                        localStorage.setItem('admin_products', JSON.stringify(finalAdminList));
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+
+                setProducts(merged);
+                setIsLoading(false);
+            }
         };
 
         loadData();

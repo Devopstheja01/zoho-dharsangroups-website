@@ -21,6 +21,12 @@ export interface Product {
     stockQuantity?: number; // Total initial stock
     onlineSales?: number;
     offlineSales?: number;
+
+    // Zoho Inventory Integration Fields
+    zoho_item_id?: string; // Zoho's unique item ID
+    zoho_sku?: string; // SKU from Zoho (may differ from our SKU)
+    zoho_category_id?: string; // Zoho category mapping
+    last_synced?: string; // ISO timestamp of last sync with Zoho
 }
 
 export const products: Product[] = [
